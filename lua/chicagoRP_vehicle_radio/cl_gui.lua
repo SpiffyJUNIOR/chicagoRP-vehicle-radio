@@ -40,7 +40,7 @@ hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
     end
 end)
 
-net.Receive("chicagoRP_settings", function()
+net.Receive("chicagoRP_vehicleradio", function()
     if IsValid(OpenMotherFrame) then return end
     local ply = LocalPlayer()
     local screenwidth = ScrW()
@@ -65,6 +65,7 @@ net.Receive("chicagoRP_settings", function()
     function motherFrame:Paint(w, h)
         BlurBackground(self)
         draw.RoundedBox(8, 0, 0, w, h, Color(0, 0, 0, 0))
+        print("THIS SHOULD NOT PRINT WHEN FRAME IS CLOSED")
     end
 
     function motherFrame:OnClose()
@@ -87,7 +88,7 @@ net.Receive("chicagoRP_settings", function()
     gameSettingsScrollPanel:Dock(FILL)
 
     for v in ipairs(playlists) do
-        local categoryButton = categoryScrollPanel:Add("DButton")
+        local categoryButton = gameSettingsScrollPanel:Add("DButton")
         categoryButton:SetText(v.name)
         categoryButton:Dock(TOP)
         categoryButton:DockMargin(0, 10, 0, 0)
