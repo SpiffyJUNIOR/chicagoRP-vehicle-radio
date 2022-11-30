@@ -1,3 +1,13 @@
+chicagoRP.radioplaylists = {
+    {
+        name = "ambient",
+        printname = "Ambient FM"
+    }, {
+        name = "idm",
+        printname = "IDM FM"
+    }
+}
+
 chicagoRP.ambientplaylist = {
     {
         artist = "Aphex Twin",
@@ -252,16 +262,30 @@ chicagoRP.ambientplaylist = {
     }
 }
 
+chicagoRP.idmplaylist = {
+    {
+        artist = "Flying Lotus",
+        length = 239,
+        song = "Do the Astral Plane",
+        url = "https://insertip/flyinglotus_dotheastralplane.ogg"
+    }, {
+        artist = "Autechre",
+        length = 519,
+        song = "Acroyear2",
+        url = "https://insertip/autechre_acroyear2.ogg"
+    }
+}
+
 concommand.Add("chicagoRP_vehicleradio_ambienttable", function()
     if SERVER then
         local SysTime = SysTime
         local count = 500
         local StartTime = SysTime()
 
-        table.Shuffle(chicagoRP.ambientplaylist)
+        table.Shuffle(chicagoRP.ambient)
 
         for i = 1, count do -- 0.232636 secs w/o shuffle, 0.246473 w shuffle
-            PrintTable(chicagoRP.ambientplaylist)
+            PrintTable(chicagoRP.ambient)
         end
 
         local EndTime = SysTime()
