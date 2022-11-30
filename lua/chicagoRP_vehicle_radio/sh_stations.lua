@@ -1,5 +1,3 @@
-chicagoRP = {}
-
 chicagoRP.ambientplaylist = {
     {
         artist = "Aphex Twin",
