@@ -1,11 +1,11 @@
 # chicagoRP-vehicle-radio
-vehicle radio system for gmod (unfinished and always will be)
+synchronous vehicle radio system for gmod
 
 # status
-completely nonfunctional
+completely nonfunctional beyond a basic GUI
 
 # to-do
-[] - base functionality    
+[w] - base functionality    
 [] - base layout    
 [] - song syncing    
 [] - accurate track time    
