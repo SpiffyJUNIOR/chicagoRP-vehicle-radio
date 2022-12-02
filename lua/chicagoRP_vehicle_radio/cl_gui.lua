@@ -1,14 +1,16 @@
 local HideHUD = false
 local OpenMotherFrame = nil
+local firstindex = firstindex or nil
+local secondindex = secondindex or nil
 local MusicTimer = MusicTimer or SysTime() + 1
 SONG = SONG or nil
 local music_list = music_list or {}
 local music_left = music_left or {}
 local next_song = next_song or ""
--- local co_MusicHandler
 local debugmode = true
+local co_MusicHandler
 
-for _, v in ipairs(chicagoRP.radioplaylists) do
+for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table gen needs to be moved to serverside
     if !IsValid(music_list[v.name]) or table.IsEmpty(music_list[v.name]) then
         music_list[v.name] = table.Copy(chicagoRP[v.name])
         music_left[v.name] = table.Copy(chicagoRP[v.name])
@@ -25,9 +27,12 @@ hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
 end)
 
 local function find_next_song(tableinput, secondtableinput)
-    if SONG then
+    if IsValid(SONG) then
         SONG:Stop()
+        print("bitchslapped that wack ass song")
     end
+
+    local nextsonglength = nextsonglength or 0
     
     if table.IsEmpty(secondtableinput) then
         secondtableinput = tableinput
@@ -35,6 +40,7 @@ local function find_next_song(tableinput, secondtableinput)
     
     for _, v in ipairs(secondtableinput) do
         next_song = table.remove(secondtableinput, 1)
+        nextsonglength = next_song.length
 
         break
     end
@@ -46,24 +52,22 @@ local function find_next_song(tableinput, secondtableinput)
             if (IsValid(station)) then
                 station:Play()
                 SONG = station
+                station:GetVolume()
                 -- Keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound
                 g_station = station
             else
-                LocalPlayer():ChatPrint( "Invalid URL!" )
+                LocalPlayer():ChatPrint("Invalid URL!")
             end
         end)
 
         break
     end
 
-    for _, v in ipairs(secondtableinput) do
-        MusicTimer = SysTime() + next_song.length + 1
-
-        break
-    end
+    MusicTimer = SysTime() + nextsonglength + 1
     
     if debugmode == true then
         print(("CURRENT SONG: %s"):format(next_song))
+        PrintTable(next_song)
         for _, v in ipairs(secondtableinput) do
             print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(next_song.length)))
 
@@ -144,8 +148,18 @@ net.Receive("chicagoRP_vehicleradio", function()
         categoryButton:SetSize(200, 50)
 
         function categoryButton:DoClick()
-            -- PlaySong()
-            find_next_song(music_list[v.name], music_left[v.name])
+            -- if IsValid(SONG) then
+            --     SONG:Stop()
+            --     print("bitchslapped that wack ass song")
+            -- end
+
+            firstindex = music_list[v.name]
+            secondindex = music_left[v.name]
+
+            -- find_next_song(music_list[v.name], music_left[v.name])
+
+            PrintTable(music_list[v.name])
+            PrintTable(music_left[v.name])
         end
     end
 
@@ -156,9 +170,31 @@ net.Receive("chicagoRP_vehicleradio", function()
     debugStopSongButton:SetSize(200, 50)
 
     function debugStopSongButton:DoClick()
-        SONG:Stop()
+        if IsValid(SONG) then
+            SONG:Stop()
+            print("bitchslapped that wack ass song")
+        end
     end
 
+    local debugVOLSongButton = gameSettingsScrollPanel:Add("DButton")
+    debugVOLSongButton:SetText("SONG VOLUME")
+    debugVOLSongButton:Dock(TOP)
+    debugVOLSongButton:DockMargin(0, 10, 0, 0)
+    debugVOLSongButton:SetSize(200, 50)
+
+    -- function debugVOLSongButton:Paint(w, h)
+    --     print(firstindex)
+    --     print(secondindex)
+    --     return false
+    -- end
+
+    function debugVOLSongButton:DoClick()
+        if IsValid(SONG) then
+            SONG:GetVolume()
+            SONG:SetVolume(math.random(0.1, 0.9))
+            print("got vol")
+        end
+    end
     -- function gameSettingsScrollPanel:Paint(w, h)
     --     -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10))
     --     -- print(self:IsVisible())
@@ -176,6 +212,30 @@ net.Receive("chicagoRP_vehicleradio", function()
     -- end
 
     OpenMotherFrame = motherFrame
+end)
+
+local function MusicHandler()
+    while true do
+        print(MusicTimer)
+        print(CurTime())
+        print("musichandler true")
+        if !IsValid(LocalPlayer()) or !IsValid(LocalPlayer():GetVehicle()) or !IsValid(firstindex) or !IsValid(secondindex) or !music_list or MusicTimer > CurTime() then return end
+
+        print("musichandler check passed")
+
+        print(firstindex)
+        print(secondindex)
+
+        find_next_song(firstindex, secondindex)
+    end
+end
+
+hook.Add("Tick", "BGM", function()
+    if !co_MusicHandler or !coroutine.resume(co_MusicHandler) then
+        print("coroutine music handler created")
+        co_MusicHandler = coroutine.create(MusicHandler)
+        coroutine.resume(co_MusicHandler)
+    end
 end)
 
 print("chicagoRP GUI loaded!")
