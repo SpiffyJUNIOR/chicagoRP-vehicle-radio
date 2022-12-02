@@ -62,12 +62,16 @@ local function find_next_song(tableinput, secondtableinput)
         break
     end
 
-    net.Start("chicagoRP_vehicleradio_playsong")
-    net.ReadString(url)
-    net.ReadString(artist)
-    net.ReadString(songname)
-    net.ReadInt(number, 16) -- timestamp
-    net.Send(Entity(1)) -- get players somehow
+    for _, v in ipairs(secondtableinput) do
+        net.Start("chicagoRP_vehicleradio_playsong")
+        net.WriteString(next_song.url)
+        net.WriteString(next_song.artist)
+        net.WriteString(next_song.songname)
+        net.WriteInt(1, 16) -- timestamp
+        net.Send(Entity(1)) -- get players somehow
+
+        break
+    end
 
     MusicTimer = SysTime() + nextsonglength + 1
     

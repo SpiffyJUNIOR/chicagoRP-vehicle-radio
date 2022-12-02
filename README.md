@@ -2,13 +2,13 @@
 synchronous vehicle radio system for gmod
 
 # status
-completely nonfunctional beyond a basic GUI
+basic GUI + basic functionality, but limited and deeply buggy
 
 # to-do
 [w] - base functionality    
 [] - base layout    
-[] - song syncing    
-[] - accurate track time    
+[w] - song syncing    
+[w] - accurate track time    
 [] - prettify    
 [] - animations?             
 [] - optimize    
