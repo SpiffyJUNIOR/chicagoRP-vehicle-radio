@@ -5,6 +5,12 @@ chicagoRP.radioplaylists = {
     }, {
         name = "idm",
         printname = "IDM FM"
+    }, {
+        name = "industrial_metal",
+        printname = "Industrial Noise FM"
+    }, {
+        name = "new_wave",
+        printname = "Poppin' FM"
     }
 }
 
@@ -38,6 +44,44 @@ chicagoRP.idm = {
         length = 519,
         song = "Acroyear2",
         url = "https://files.catbox.moe/s6xq61.mp3"
+    }
+}
+
+chicagoRP.industrial_metal = {
+    {
+        artist = "Strapping Young Lad",
+        length = 337,
+        song = "Detox",
+        url = "https://files.catbox.moe/4vhe6k.mp3"
+    }, {
+        artist = "Strapping Young Lad",
+        length = 343,
+        song = "Love?",
+        url = "https://files.catbox.moe/1wzdc4.mp3"
+    }, {
+        artist = "Strapping Young Lad",
+        length = 402,
+        song = "Skeksis",
+        url = "https://files.catbox.moe/zu9jfn.mp3"
+    }
+}
+
+chicagoRP.new_wave = {
+    {
+        artist = "David Bowie",
+        length = 456,
+        song = "Let's Dance",
+        url = "https://files.catbox.moe/txe0bk.mp3"
+    }, {
+        artist = "New Order",
+        length = 356,
+        song = "Your Slient Face",
+        url = "https://files.catbox.moe/80hgkv.mp3"
+    }, {
+        artist = "Talking Heads",
+        length = 349,
+        song = "Born Under Punches (The Heat Goes On)",
+        url = "https://files.catbox.moe/4rfuv4.mp3"
     }
 }
 

@@ -15,7 +15,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
     local url = net.ReadString()
     local artist = net.ReadString()
     local songname = net.ReadString()
-    local timestamp = net.ReadInt(16)
+    local timestamp = net.WriteFloat()
 
     print("URL: " .. url)
     print("Artist: " .. artist)

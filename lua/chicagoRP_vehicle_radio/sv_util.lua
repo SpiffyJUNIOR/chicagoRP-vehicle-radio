@@ -11,9 +11,10 @@ end)
 local firstindex = firstindex or nil
 local secondindex = secondindex or nil
 
-local StartPosition = StartPosition or SysTime()
-local NextSongTime = NextSongTime or nil
-local timestamp = StartPosition - SysTime()
+local StartPosition = StartPosition or {}
+local NextSongTime = NextSongTime or {}
+local timestamp = timestamp or {}
+-- local timestamp = StartPosition - SysTime()
 
 local music_list = music_list or {}
 local music_left = music_left or {}
@@ -43,8 +44,8 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
         print("music_left table generated")
 
         for _, v2 in ipairs (music_left[v.name]) do
-            StartPosition = SysTime()
-            NextSongTime = StartPosition + v2.length + 1
+            StartPosition[v.name] = SysTime()
+            NextSongTime[v.name] = StartPosition[v.name] + v2.length + 1
             print("initial StartPosition and NextSongTime set!")
         end
 
@@ -67,26 +68,30 @@ end)
 
 local function table_calculation()
     for _, v2 in ipairs (music_left[v.name]) do
-        if NextSongTime <= StartPosition then
+        if NextSongTime[v.name] <= StartPosition[v.name] then
             table.remove(music_left[v.name], 1)
-            StartPosition = SysTime()
-            NextSongTime = StartPosition + v2.length + 1
+            StartPosition[v.name] = SysTime()
+            NextSongTime[v.name] = StartPosition[v.name] + v2.length + 1
             print("song removed")
         end
         if table.IsEmpty(music_left[v.name]) then
-            music_left = music_list[v.name]
+            music_left[v.name] = music_list[v.name]
             print("music_left table regenerated")
         end
     end
 end
 
 local function find_next_song(tableinput, secondtableinput)
+    for _, v1 in ipairs(music_left[v.name]) do
+        timestamp[v1.name] = StartPosition - SysTime()
+    end
+
     for _, v2 in ipairs(secondtableinput) do
         net.Start("chicagoRP_vehicleradio_playsong")
         net.WriteString(v2.url)
         net.WriteString(v2.artist)
         net.WriteString(v2.songname)
-        net.WriteInt(timestamp, 16) -- timestamp
+        net.WriteFloat(timestamp[v2.name]) -- how the fuck do we get timestamp[v.name]
         net.Send(Entity(1)) -- get players somehow
 
         print("play song net sent")
@@ -115,6 +120,7 @@ local function MusicHandler()
         print("CurTime: " .. CurTime())
         print("SysTime: " .. SysTime())
         print("musichandler true")
+        table_calculation()
         if !IsValid(firstindex) or !IsValid(secondindex) or !music_list then return end -- or MusicTimer > CurTime()
 
         find_next_song(firstindex, secondindex)
