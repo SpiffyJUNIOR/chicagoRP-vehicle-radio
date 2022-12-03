@@ -17,6 +17,13 @@ net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
     local songname = net.ReadString()
     local timestamp = net.ReadInt(16)
 
+    print("URL: " .. url)
+    print("Artist: " .. artist)
+    print("Next Song: " .. songname)
+    print("TimeStamp: " .. timestamp)
+
+    print("play song net received")
+
     if IsValid(SONG) then
         SONG:Stop()
         print("bitchslapped that weak song, say goodbye to your aux cord privileges")
@@ -27,8 +34,10 @@ net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
     sound.PlayURL(url, "noblock", function(station)
         if (IsValid(station)) then
             station:Play()
+            station:SetTime(timestamp, true)
             SONG = station
             station:GetVolume()
+            print("song playing")
             g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
         else
             LocalPlayer():ChatPrint("Invalid URL!")
@@ -110,15 +119,10 @@ net.Receive("chicagoRP_vehicleradio", function()
             net.WriteString(v.name)
             net.SendToServer()
 
+            print("station name sent!")
+
             print(v.name)
-            -- firstindex = music_list[v.name]
-            -- secondindex = music_left[v.name]
-
-            -- find_next_song(music_list[v.name], music_left[v.name])
-
-            -- PrintTable(music_list[v.name])
-            -- PrintTable(music_left[v.name])
-        -- end
+        end
     end
 
     local debugStopSongButton = gameSettingsScrollPanel:Add("DButton")

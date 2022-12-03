@@ -10,10 +10,15 @@ end)
 
 local firstindex = firstindex or nil
 local secondindex = secondindex or nil
-local MusicTimer = MusicTimer or SysTime() + 1
+
+local StartPosition = StartPosition or SysTime()
+local NextSongTime = NextSongTime or nil
+local timestamp = StartPosition - SysTime()
+
 local music_list = music_list or {}
 local music_left = music_left or {}
 local next_song = next_song or ""
+
 local debugmode = true
 local co_MusicHandler
 
@@ -25,6 +30,8 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
         
         table.Shuffle(music_list[v.name])
 
+        print("music_list table regenerated")
+
         PrintTable(music_list)
     end
 
@@ -32,6 +39,14 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
         music_left[v.name] = music_list[v.name] or {}
 
         table.CopyFromTo(music_list[v.name], music_left[v.name])
+
+        print("music_left table generated")
+
+        for _, v2 in ipairs (music_left[v.name]) do
+            StartPosition = SysTime()
+            NextSongTime = StartPosition + v2.length + 1
+            print("initial StartPosition and NextSongTime set!")
+        end
 
         PrintTable(music_left)
     end
@@ -46,34 +61,38 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(ply)
 
     firstindex = music_list[stationname]
     secondindex = music_left[stationname]
+
+    print("station name received!")
 end)
 
+local function table_calculation()
+    for _, v2 in ipairs (music_left[v.name]) do
+        if NextSongTime <= StartPosition then
+            table.remove(music_left[v.name], 1)
+            StartPosition = SysTime()
+            NextSongTime = StartPosition + v2.length + 1
+            print("song removed")
+        end
+        if table.IsEmpty(music_left[v.name]) then
+            music_left = music_list[v.name]
+            print("music_left table regenerated")
+        end
+    end
+end
+
 local function find_next_song(tableinput, secondtableinput)
-    local nextsonglength = nextsonglength or 0
-    
-    if table.IsEmpty(secondtableinput) then
-        secondtableinput = tableinput
-    end
-    
-    for _, v in ipairs(secondtableinput) do
-        next_song = table.remove(secondtableinput, 1)
-        nextsonglength = next_song.length
-
-        break
-    end
-
-    for _, v in ipairs(secondtableinput) do
+    for _, v2 in ipairs(secondtableinput) do
         net.Start("chicagoRP_vehicleradio_playsong")
-        net.WriteString(next_song.url)
-        net.WriteString(next_song.artist)
-        net.WriteString(next_song.songname)
-        net.WriteInt(1, 16) -- timestamp
+        net.WriteString(v2.url)
+        net.WriteString(v2.artist)
+        net.WriteString(v2.songname)
+        net.WriteInt(timestamp, 16) -- timestamp
         net.Send(Entity(1)) -- get players somehow
 
+        print("play song net sent")
+
         break
     end
-
-    MusicTimer = SysTime() + nextsonglength + 1
     
     if debugmode == true then
         print(("CURRENT SONG: %s"):format(next_song))
@@ -90,8 +109,11 @@ end
 
 local function MusicHandler()
     while true do
-        print(MusicTimer)
-        print(CurTime())
+        print("Song Start Time: " .. StartPosition)
+        print("Next Song: " .. NextSongTime)
+        print("TimeStamp: " .. timestamp)
+        print("CurTime: " .. CurTime())
+        print("SysTime: " .. SysTime())
         print("musichandler true")
         if !IsValid(firstindex) or !IsValid(secondindex) or !music_list then return end -- or MusicTimer > CurTime()
 
