@@ -78,7 +78,7 @@ end)
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
         -- local realname = v.name
-        if NextSongTime[v.name] <= SysTime() then
+        if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
             print("attempted to remove song")
             table.remove(music_left[v.name], 1)
             -- StartPosition[v.name] = SysTime()
@@ -92,9 +92,11 @@ local function table_calculation()
             end
             print("song removed")
         end
-        if table.IsEmpty(music_left[v.name]) and IsValid(music_left[v.name]) then
-            music_left[v.name] = music_list[v.name]
+        if table.IsEmpty(music_left[v.name]) then
+            music_left[v.name] = table.Copy(music_list[v.name])
+
             print("music_left table regenerated")
+
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
