@@ -28,8 +28,6 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
         music_list[v.name] = music_list[v.name] or {}
 
         music_list[v.name] = table.Copy(chicagoRP[v.name])
-        
-        table.Shuffle(music_list[v.name])
 
         print("music_list table generated")
 
@@ -40,6 +38,8 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
         music_left[v.name] = music_left[v.name] or {}
 
         music_left[v.name] = table.Copy(music_list[v.name])
+
+        table.Shuffle(music_left[v.name])
 
         print("music_left table generated")
 
@@ -77,12 +77,11 @@ end)
 
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        -- local realname = v.name
         if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
             print("attempted to remove song")
+
             table.remove(music_left[v.name], 1)
-            -- StartPosition[v.name] = SysTime()
-            -- NextSongTime[v.name] = StartPosition[v.name] + v2.length
+
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
@@ -90,10 +89,13 @@ local function table_calculation()
 
                 break
             end
+
             print("song removed")
         end
         if table.IsEmpty(music_left[v.name]) then
             music_left[v.name] = table.Copy(music_list[v.name])
+
+            table.Shuffle(music_left[v.name])
 
             print("music_left table regenerated")
 
