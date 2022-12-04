@@ -20,6 +20,7 @@ local music_list = music_list or {}
 local music_left = music_left or {}
 local next_song = next_song or ""
 
+local activeradio = activeradio or false
 local debugmode = true
 local co_MusicHandler
 
@@ -59,6 +60,14 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
+
+    local enabled = net.ReadBool()
+
+    if enabled == false then activeradio = false return end
+
+    if enabled == true then
+        activeradio = true
+    end
 
     local stationname = net.ReadString()
 
@@ -155,11 +164,12 @@ local function MusicHandler()
         -- print("SysTime: " .. SysTime())
         -- print("musichandler true")
         table_calculation()
-        if !IsValid(firstindex) or !IsValid(secondindex) then return end -- or MusicTimer > CurTime()
-        PrintTable(firstindex)
-        PrintTable(secondindex)
-
-        find_next_song(firstindex, secondindex)
+        if activeradio == (false or nil) then return end -- or MusicTimer > CurTime()
+        -- PrintTable(firstindex)
+        -- PrintTable(secondindex)
+        if activeradio == true then
+            find_next_song(firstindex, secondindex)
+        end
     end
 end
 

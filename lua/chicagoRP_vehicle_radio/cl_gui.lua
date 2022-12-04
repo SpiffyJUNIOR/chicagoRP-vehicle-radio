@@ -116,6 +116,7 @@ net.Receive("chicagoRP_vehicleradio", function()
 
         function categoryButton:DoClick()
             net.Start("chicagoRP_vehicleradio_receiveindex")
+            net.WriteBool(true)
             net.WriteString(v.name)
             net.SendToServer()
 
@@ -136,6 +137,9 @@ net.Receive("chicagoRP_vehicleradio", function()
             SONG:Stop()
             print("bitchslapped that wack ass song")
         end
+        net.Start("chicagoRP_vehicleradio_receiveindex")
+        net.WriteBool(false)
+        net.SendToServer()
     end
 
     local debugVOLSongButton = gameSettingsScrollPanel:Add("DButton")
