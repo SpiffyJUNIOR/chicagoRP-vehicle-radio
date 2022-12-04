@@ -17,17 +17,17 @@ chicagoRP.radioplaylists = {
 chicagoRP.ambient = {
     {
         artist = "Aphex Twin",
-        length = 440,
+        length = 10, -- 440
         song = "Blue Calx",
         url = "https://files.catbox.moe/m6q7g3.mp3"
     }, {
         artist = "Aphex Twin",
-        length = 357,
+        length = 14, -- 357
         song = "Hexagon",
         url = "https://files.catbox.moe/a9mgh1.mp3"
     }, {
         artist = "Aphex Twin",
-        length = 611,
+        length = 21, -- 611
         song = "Stone in Focus",
         url = "https://files.catbox.moe/w4ih54.mp3"
     }
@@ -36,12 +36,12 @@ chicagoRP.ambient = {
 chicagoRP.idm = {
     {
         artist = "Flying Lotus",
-        length = 262,
+        length = 22, -- 262
         song = "Do the Astral Plane",
         url = "https://files.catbox.moe/sduxdr.mp3"
     }, {
         artist = "Autechre",
-        length = 519,
+        length = 19, -- 519
         song = "Acroyear2",
         url = "https://files.catbox.moe/s6xq61.mp3"
     }
@@ -50,17 +50,17 @@ chicagoRP.idm = {
 chicagoRP.industrial_metal = {
     {
         artist = "Strapping Young Lad",
-        length = 337,
+        length = 17, -- 337
         song = "Detox",
         url = "https://files.catbox.moe/4vhe6k.mp3"
     }, {
         artist = "Strapping Young Lad",
-        length = 343,
+        length = 23, -- 343
         song = "Love?",
         url = "https://files.catbox.moe/1wzdc4.mp3"
     }, {
         artist = "Strapping Young Lad",
-        length = 402,
+        length = 16, -- 402
         song = "Skeksis",
         url = "https://files.catbox.moe/zu9jfn.mp3"
     }
@@ -69,17 +69,17 @@ chicagoRP.industrial_metal = {
 chicagoRP.new_wave = {
     {
         artist = "David Bowie",
-        length = 456,
+        length = 46, -- 456
         song = "Let's Dance",
         url = "https://files.catbox.moe/txe0bk.mp3"
     }, {
         artist = "New Order",
-        length = 356,
+        length = 36, -- 356
         song = "Your Slient Face",
         url = "https://files.catbox.moe/80hgkv.mp3"
     }, {
         artist = "Talking Heads",
-        length = 349,
+        length = 39, -- 349
         song = "Born Under Punches (The Heat Goes On)",
         url = "https://files.catbox.moe/4rfuv4.mp3"
     }

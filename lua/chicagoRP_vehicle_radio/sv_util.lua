@@ -27,29 +27,31 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
     if !IsValid(music_list[v.name]) or table.IsEmpty(music_list[v.name]) then
         music_list[v.name] = music_list[v.name] or {}
 
-        table.CopyFromTo(chicagoRP[v.name], music_list[v.name])
+        music_list[v.name] = table.Copy(chicagoRP[v.name])
         
         table.Shuffle(music_list[v.name])
 
-        print("music_list table regenerated")
+        print("music_list table generated")
 
         PrintTable(music_list)
     end
 
     if !IsValid(music_left[v.name]) or table.IsEmpty(music_left[v.name]) then
-        music_left[v.name] = music_list[v.name] or {}
+        music_left[v.name] = music_left[v.name] or {}
 
-        table.CopyFromTo(music_list[v.name], music_left[v.name])
+        music_left[v.name] = table.Copy(music_list[v.name])
 
         print("music_left table generated")
 
         for _, v2 in ipairs (music_left[v.name]) do
             StartPosition[v.name] = SysTime()
-            NextSongTime[v.name] = StartPosition[v.name] + v2.length + 1
+            NextSongTime[v.name] = StartPosition[v.name] + v2.length
             print("initial StartPosition and NextSongTime set!")
+
+            break
         end
 
-        PrintTable(music_left)
+        -- PrintTable(music_left)
     end
 end
 
@@ -67,19 +69,27 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
 
     PrintTable(firstindex)
     PrintTable(secondindex)
+    print(firstindex)
+    print(secondindex)
 
     print("station name received!")
 end)
 
 local function table_calculation()
-    for _, v2 in ipairs (music_left[v.name]) do
-        if NextSongTime[v.name] <= StartPosition[v.name] then
-            table.remove(music_left[v.name], 1)
-            StartPosition[v.name] = SysTime()
-            NextSongTime[v.name] = StartPosition[v.name] + v2.length + 1
+    for _, v in ipairs(chicagoRP.radioplaylists) do
+        -- print(StartPosition[v.name])
+        -- print("StartPosition^^^^^")
+        -- print(NextSongTime[v.name])
+        -- print("NextSongTime^^^^^")
+        local realname = v.name
+        if NextSongTime[realname] < StartPosition[realname] then
+            print("attempted to remove song")
+            table.remove(music_left[realname], 1)
+            StartPosition[realname] = SysTime()
+            NextSongTime[realname] = StartPosition[realname] + v2.length
             print("song removed")
         end
-        if table.IsEmpty(music_left[v.name]) then
+        if table.IsEmpty(music_left[v.name]) and IsValid(music_left[v.name]) then
             music_left[v.name] = music_list[v.name]
             print("music_left table regenerated")
         end
@@ -87,8 +97,8 @@ local function table_calculation()
 end
 
 local function find_next_song(tableinput, secondtableinput)
-    if !IsValid(tableinput) then return end
-    if !IsValid(secondtableinput) then return end
+    -- if !IsValid(tableinput) then return end
+    -- if !IsValid(secondtableinput) then return end
 
     print("find_next_song running!")
 
@@ -131,7 +141,7 @@ local function MusicHandler()
         -- print("SysTime: " .. SysTime())
         -- print("musichandler true")
         table_calculation()
-        if !IsValid(firstindex) or !IsValid(secondindex) or !music_list then return end -- or MusicTimer > CurTime()
+        if !IsValid(firstindex) or !IsValid(secondindex) then return end -- or MusicTimer > CurTime()
         PrintTable(firstindex)
         PrintTable(secondindex)
 
@@ -145,35 +155,51 @@ hook.Add("Tick", "BGM", function()
         co_MusicHandler = coroutine.create(MusicHandler)
         coroutine.resume(co_MusicHandler)
     end
-    if IsValid(StartPosition) then
-        print("Song Start Time: " .. StartPosition)
-    end
-    if IsValid(NextSongTime) then
-        print("Next Song: " .. NextSongTime)
-    end
-    if IsValid(timestamp) then
-        print("TimeStamp: " .. timestamp)
-    end
+    -- if IsValid(StartPosition) then
+    --     print("Song Start Time: " .. StartPosition)
+    -- end
+    -- if IsValid(NextSongTime) then
+    --     print("Next Song: " .. NextSongTime)
+    -- end
+    -- if IsValid(timestamp) then
+    --     print("TimeStamp: " .. timestamp)
+    -- end
     -- print("CurTime: " .. CurTime())
     -- print("SysTime: " .. SysTime())
 end)
 
 concommand.Add("print_musiclist", function(ply)
     for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
-        print(music_list[v.name])
+        PrintTable(music_list[v.name])
     end
+    PrintTable(music_list)
+    print("music_list printed")
 end)
 
 concommand.Add("print_musicleft", function(ply)
     for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
-        print(music_left[v.name])
+        PrintTable(music_left[v.name])
     end
+    PrintTable(music_left)
+    print("music_left printed")
 end)
 
 concommand.Add("print_timers", function(ply)
-    print("Song Start Time: " .. StartPosition)
-    print("Next Song: " .. NextSongTime)
-    print("TimeStamp: " .. timestamp)
+    PrintTable(StartPosition)
+    print("StartPosition^^^^^")
+    PrintTable(NextSongTime)
+    print("NextSongTime^^^^^")
+    PrintTable(timestamp)
+    print("TimeStamp^^^^^")
+    print("timers printed")
+    print("SysTime: " .. SysTime())
+    for _, v in ipairs(chicagoRP.radioplaylists) do
+        print(NextSongTime[v.name] <= StartPosition[v.name])
+        print(StartPosition[v.name])
+        print("StartPosition^^^^^")
+        print(NextSongTime[v.name])
+        print("NextSongTime^^^^^")
+    end
 end)
 
 
