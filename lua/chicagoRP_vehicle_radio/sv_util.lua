@@ -53,15 +53,20 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
     end
 end
 
-net.Receive("chicagoRP_vehicleradio_receiveindex", function(ply)
+net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
 
     local stationname = net.ReadString()
 
+    print(stationname)
+
     firstindex = music_list[stationname]
     secondindex = music_left[stationname]
+
+    PrintTable(firstindex)
+    PrintTable(secondindex)
 
     print("station name received!")
 end)
@@ -82,6 +87,11 @@ local function table_calculation()
 end
 
 local function find_next_song(tableinput, secondtableinput)
+    if !IsValid(tableinput) then return end
+    if !IsValid(secondtableinput) then return end
+
+    print("find_next_song running!")
+
     for _, v1 in ipairs(music_left[v.name]) do
         timestamp[v1.name] = StartPosition - SysTime()
     end
@@ -114,14 +124,16 @@ end
 
 local function MusicHandler()
     while true do
-        print("Song Start Time: " .. StartPosition)
-        print("Next Song: " .. NextSongTime)
-        print("TimeStamp: " .. timestamp)
-        print("CurTime: " .. CurTime())
-        print("SysTime: " .. SysTime())
-        print("musichandler true")
+        -- print("Song Start Time: " .. StartPosition)
+        -- print("Next Song: " .. NextSongTime)
+        -- print("TimeStamp: " .. timestamp)
+        -- print("CurTime: " .. CurTime())
+        -- print("SysTime: " .. SysTime())
+        -- print("musichandler true")
         table_calculation()
         if !IsValid(firstindex) or !IsValid(secondindex) or !music_list then return end -- or MusicTimer > CurTime()
+        PrintTable(firstindex)
+        PrintTable(secondindex)
 
         find_next_song(firstindex, secondindex)
     end
@@ -129,10 +141,40 @@ end
 
 hook.Add("Tick", "BGM", function()
     if !co_MusicHandler or !coroutine.resume(co_MusicHandler) then
-        print("coroutine music handler created")
+        -- print("coroutine music handler created")
         co_MusicHandler = coroutine.create(MusicHandler)
         coroutine.resume(co_MusicHandler)
     end
+    if IsValid(StartPosition) then
+        print("Song Start Time: " .. StartPosition)
+    end
+    if IsValid(NextSongTime) then
+        print("Next Song: " .. NextSongTime)
+    end
+    if IsValid(timestamp) then
+        print("TimeStamp: " .. timestamp)
+    end
+    -- print("CurTime: " .. CurTime())
+    -- print("SysTime: " .. SysTime())
 end)
+
+concommand.Add("print_musiclist", function(ply)
+    for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
+        print(music_list[v.name])
+    end
+end)
+
+concommand.Add("print_musicleft", function(ply)
+    for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
+        print(music_left[v.name])
+    end
+end)
+
+concommand.Add("print_timers", function(ply)
+    print("Song Start Time: " .. StartPosition)
+    print("Next Song: " .. NextSongTime)
+    print("TimeStamp: " .. timestamp)
+end)
+
 
 print("chicagoRP Vehicle Radio server util loaded!")
