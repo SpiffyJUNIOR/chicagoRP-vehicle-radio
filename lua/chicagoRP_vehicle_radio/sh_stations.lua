@@ -17,7 +17,7 @@ chicagoRP.radioplaylists = {
 chicagoRP.ambient = {
     {
         artist = "Aphex Twin",
-        length = 10, -- 440
+        length = 12, -- 440
         song = "Blue Calx",
         url = "https://files.catbox.moe/m6q7g3.mp3"
     }, {
