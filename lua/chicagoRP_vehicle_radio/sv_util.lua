@@ -77,21 +77,31 @@ end)
 
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        -- print(StartPosition[v.name])
-        -- print("StartPosition^^^^^")
-        -- print(NextSongTime[v.name])
-        -- print("NextSongTime^^^^^")
-        local realname = v.name
-        if NextSongTime[realname] < StartPosition[realname] then
+        -- local realname = v.name
+        if NextSongTime[v.name] <= SysTime() then
             print("attempted to remove song")
-            table.remove(music_left[realname], 1)
-            StartPosition[realname] = SysTime()
-            NextSongTime[realname] = StartPosition[realname] + v2.length
+            table.remove(music_left[v.name], 1)
+            -- StartPosition[v.name] = SysTime()
+            -- NextSongTime[v.name] = StartPosition[v.name] + v2.length
+            for _, v2 in ipairs (music_left[v.name]) do
+                StartPosition[v.name] = SysTime()
+                NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                print("future StartPosition and NextSongTime set!")
+
+                break
+            end
             print("song removed")
         end
         if table.IsEmpty(music_left[v.name]) and IsValid(music_left[v.name]) then
             music_left[v.name] = music_list[v.name]
             print("music_left table regenerated")
+            for _, v2 in ipairs (music_left[v.name]) do
+                StartPosition[v.name] = SysTime()
+                NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                print("initial StartPosition and NextSongTime set!")
+
+                break
+            end
         end
     end
 end
@@ -194,7 +204,7 @@ concommand.Add("print_timers", function(ply)
     print("timers printed")
     print("SysTime: " .. SysTime())
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        print(NextSongTime[v.name] <= StartPosition[v.name])
+        print(NextSongTime[v.name] <= SysTime())
         print(StartPosition[v.name])
         print("StartPosition^^^^^")
         print(NextSongTime[v.name])
