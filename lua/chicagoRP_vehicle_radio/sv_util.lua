@@ -14,7 +14,6 @@ local secondindex = secondindex or nil
 local StartPosition = StartPosition or {}
 local NextSongTime = NextSongTime or {}
 local timestamp = timestamp or {}
--- local timestamp = StartPosition - SysTime()
 
 local music_list = music_list or {}
 local music_left = music_left or {}
@@ -76,6 +75,8 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     firstindex = music_list[stationname]
     secondindex = music_left[stationname]
 
+    PlaySong(ply)
+
     PrintTable(firstindex)
     PrintTable(secondindex)
     print(firstindex)
@@ -96,6 +97,10 @@ local function table_calculation()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
                 print("future StartPosition and NextSongTime set!")
 
+                if radioactive == true then
+                    PlaySong()
+                end
+
                 break
             end
 
@@ -113,16 +118,59 @@ local function table_calculation()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
                 print("initial StartPosition and NextSongTime set!")
 
+                if radioactive == true then
+                    PlaySong()
+                end
+
                 break
             end
         end
     end
 end
 
-local function find_next_song(tableinput, secondtableinput)
-    -- if !IsValid(tableinput) then return end
-    -- if !IsValid(secondtableinput) then return end
+local function PlaySong(ply)
+    print("PlaySong ran!")
 
+    if ply == nil then ply == Entity(1) end
+
+    for _, v1 in ipairs(chicagoRP.radioplaylists) do
+        for _, v in ipairs(music_left[v1.name]) do
+            timestamp[v.name] = StartPosition - SysTime()
+        end
+    end
+
+    for _, v2 in ipairs(secondindex) do
+        net.Start("chicagoRP_vehicleradio_playsong")
+        net.WriteString(v2.url)
+        net.WriteString(v2.artist)
+        net.WriteString(v2.songname)
+        for _, v3 in ipairs(chicagoRP.radioplaylists) do
+            net.WriteFloat(timestamp[v3.name]) -- how the fuck do we get timestamp[v.name]
+
+            print("PlaySong timestamp loop ran!")
+
+            break
+        end
+        net.Send(Entity(1)) -- get players somehow
+
+        print("play song net sent")
+
+        break
+    end
+
+    if debugmode == true then
+        for _, v in ipairs(secondtableinput) do
+            print(("CURRENT SONG: %s"):format(v2.artist .. " - " .. v.songname))
+            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(timestamp[v.name])))
+
+            break
+        end
+        
+        -- PrintTable(music_left)
+    end
+end
+
+local function find_next_song(tableinput, secondtableinput) -- make this a meta function
     print("find_next_song running!")
 
     for _, v1 in ipairs(music_left[v.name]) do
@@ -143,10 +191,10 @@ local function find_next_song(tableinput, secondtableinput)
     end
     
     if debugmode == true then
-        print(("CURRENT SONG: %s"):format(next_song))
-        PrintTable(next_song)
         for _, v in ipairs(secondtableinput) do
-            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(next_song.length)))
+            print(("CURRENT SONG: %s"):format(v2.artist .. " - " .. v.songname))
+
+            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(timestamp[v2.name])))
 
             break
         end
@@ -164,32 +212,21 @@ local function MusicHandler()
         -- print("SysTime: " .. SysTime())
         -- print("musichandler true")
         table_calculation()
-        if activeradio == (false or nil) then return end -- or MusicTimer > CurTime()
+        -- if activeradio == (false or nil) then return end -- or MusicTimer > CurTime()
         -- PrintTable(firstindex)
         -- PrintTable(secondindex)
-        if activeradio == true then
-            find_next_song(firstindex, secondindex)
-        end
+        -- if activeradio == true then
+        --     find_next_song(firstindex, secondindex)
+        -- end
     end
 end
 
-hook.Add("Tick", "BGM", function()
+hook.Add("Tick", "chicagoRP_vehicleradio_coroutine", function()
     if !co_MusicHandler or !coroutine.resume(co_MusicHandler) then
         -- print("coroutine music handler created")
         co_MusicHandler = coroutine.create(MusicHandler)
         coroutine.resume(co_MusicHandler)
     end
-    -- if IsValid(StartPosition) then
-    --     print("Song Start Time: " .. StartPosition)
-    -- end
-    -- if IsValid(NextSongTime) then
-    --     print("Next Song: " .. NextSongTime)
-    -- end
-    -- if IsValid(timestamp) then
-    --     print("TimeStamp: " .. timestamp)
-    -- end
-    -- print("CurTime: " .. CurTime())
-    -- print("SysTime: " .. SysTime())
 end)
 
 concommand.Add("print_musiclist", function(ply)
