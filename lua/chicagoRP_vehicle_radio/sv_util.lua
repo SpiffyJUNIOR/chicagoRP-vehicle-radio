@@ -2,12 +2,6 @@ util.AddNetworkString("chicagoRP_vehicleradio")
 util.AddNetworkString("chicagoRP_vehicleradio_playsong")
 util.AddNetworkString("chicagoRP_vehicleradio_receiveindex")
 
-concommand.Add("chicagoRP_vehicleradio", function(ply)
-    if !IsValid(ply) then return end
-    net.Start("chicagoRP_vehicleradio")
-    net.Send(ply)
-end)
-
 local firstindex = firstindex or nil
 local secondindex = secondindex or nil
 
@@ -19,7 +13,7 @@ local music_list = music_list or {}
 local music_left = music_left or {}
 local next_song = next_song or ""
 
-local activeradio = activeradio or false
+local activeradio = activeradio or nil
 local debugmode = true
 local co_MusicHandler
 
@@ -54,36 +48,6 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
         -- PrintTable(music_left)
     end
 end
-
-net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
-    if !IsValid(ply) then return end
-    if !IsValid(ply:GetVehicle()) then return end
-    if !ply:InVehicle() then return end
-
-    local enabled = net.ReadBool()
-
-    if enabled == false then activeradio = false return end
-
-    if enabled == true then
-        activeradio = true
-    end
-
-    local stationname = net.ReadString()
-
-    print(stationname)
-
-    firstindex = music_list[stationname]
-    secondindex = music_left[stationname]
-
-    PlaySong(ply)
-
-    PrintTable(firstindex)
-    PrintTable(secondindex)
-    print(firstindex)
-    print(secondindex)
-
-    print("station name received!")
-end)
 
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
@@ -131,19 +95,30 @@ end
 local function PlaySong(ply)
     print("PlaySong ran!")
 
-    if ply == nil then ply == Entity(1) end
+    if ply == nil then ply = Entity(1) end
 
     for _, v1 in ipairs(chicagoRP.radioplaylists) do
         for _, v in ipairs(music_left[v1.name]) do
-            timestamp[v.name] = StartPosition - SysTime()
+            timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
+            -- PrintTable(timestamp)
+            -- print(StartPosition[v1.name])
+            -- print(SysTime())
         end
     end
 
-    for _, v2 in ipairs(secondindex) do
+    PrintTable(music_left[secondindex])
+
+    for _, v2 in ipairs(music_left[secondindex]) do
+        print(v2.url)
+        print(v2.artist)
+        print(v2.song)
+        print(IsValid(v2.url))
+        print(IsValid(v2.artist))
+        print(IsValid(v2.song))
         net.Start("chicagoRP_vehicleradio_playsong")
         net.WriteString(v2.url)
         net.WriteString(v2.artist)
-        net.WriteString(v2.songname)
+        net.WriteString(v2.song)
         for _, v3 in ipairs(chicagoRP.radioplaylists) do
             net.WriteFloat(timestamp[v3.name]) -- how the fuck do we get timestamp[v.name]
 
@@ -159,74 +134,62 @@ local function PlaySong(ply)
     end
 
     if debugmode == true then
-        for _, v in ipairs(secondtableinput) do
-            print(("CURRENT SONG: %s"):format(v2.artist .. " - " .. v.songname))
-            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(timestamp[v.name])))
+        for _, v in ipairs(music_left[secondindex]) do
+            print(("CURRENT SONG: %s"):format(v.artist .. " - " .. v.song))
+            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(v.length)))
 
             break
         end
-        
+
         -- PrintTable(music_left)
     end
 end
 
-local function find_next_song(tableinput, secondtableinput) -- make this a meta function
-    print("find_next_song running!")
+net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
+    -- if !IsValid(ply) then return end
+    -- if !IsValid(ply:GetVehicle()) then return end
+    -- if !ply:InVehicle() then return end
 
-    for _, v1 in ipairs(music_left[v.name]) do
-        timestamp[v1.name] = StartPosition - SysTime()
+    print("receiveindex received")
+
+    local enabled = net.ReadBool()
+
+    if enabled == false then activeradio = false return end
+
+    if enabled == true then
+        activeradio = true
+        print("activeradio set to true")
     end
 
-    for _, v2 in ipairs(secondtableinput) do
-        net.Start("chicagoRP_vehicleradio_playsong")
-        net.WriteString(v2.url)
-        net.WriteString(v2.artist)
-        net.WriteString(v2.songname)
-        net.WriteFloat(timestamp[v2.name]) -- how the fuck do we get timestamp[v.name]
-        net.Send(Entity(1)) -- get players somehow
+    local stationname = net.ReadString()
 
-        print("play song net sent")
+    print(stationname)
 
-        break
-    end
-    
-    if debugmode == true then
-        for _, v in ipairs(secondtableinput) do
-            print(("CURRENT SONG: %s"):format(v2.artist .. " - " .. v.songname))
+    firstindex = stationname
+    secondindex = stationname
 
-            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(timestamp[v2.name])))
+    PlaySong(ply)
 
-            break
-        end
-        
-        PrintTable(music_left)
-    end
-end
+    -- PrintTable(firstindex)
+    -- PrintTable(secondindex)
+    print(firstindex)
+    print(secondindex)
+
+    print("station name received!")
+end)
 
 local function MusicHandler()
-    while true do
-        -- print("Song Start Time: " .. StartPosition)
-        -- print("Next Song: " .. NextSongTime)
-        -- print("TimeStamp: " .. timestamp)
-        -- print("CurTime: " .. CurTime())
-        -- print("SysTime: " .. SysTime())
-        -- print("musichandler true")
-        table_calculation()
-        -- if activeradio == (false or nil) then return end -- or MusicTimer > CurTime()
-        -- PrintTable(firstindex)
-        -- PrintTable(secondindex)
-        -- if activeradio == true then
-        --     find_next_song(firstindex, secondindex)
-        -- end
-    end
+    -- print("SysTime: " .. SysTime())
+    -- print("musichandler working")
+    table_calculation()
 end
 
-hook.Add("Tick", "chicagoRP_vehicleradio_coroutine", function()
-    if !co_MusicHandler or !coroutine.resume(co_MusicHandler) then
-        -- print("coroutine music handler created")
-        co_MusicHandler = coroutine.create(MusicHandler)
-        coroutine.resume(co_MusicHandler)
-    end
+hook.Add("Tick", "chicagoRP_vehicleradio_tablelogicloop", MusicHandler)
+
+concommand.Add("chicagoRP_vehicleradio", function(ply)
+    if !IsValid(ply) then return end
+    net.Start("chicagoRP_vehicleradio")
+    net.Send(ply)
 end)
 
 concommand.Add("print_musiclist", function(ply)

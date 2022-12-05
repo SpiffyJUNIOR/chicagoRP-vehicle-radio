@@ -8,14 +8,15 @@ hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
     end
 end)
 
-net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
+net.Receive("chicagoRP_vehicleradio_playsong", function()
+    local ply = LocalPlayer()
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
     local url = net.ReadString()
     local artist = net.ReadString()
     local songname = net.ReadString()
-    local timestamp = net.WriteFloat()
+    local timestamp = net.ReadFloat()
 
     print("URL: " .. url)
     print("Artist: " .. artist)
@@ -23,6 +24,8 @@ net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
     print("TimeStamp: " .. timestamp)
 
     print("play song net received")
+
+    math.Round(timestamp, 2)
 
     if IsValid(SONG) then
         SONG:Stop()
@@ -34,6 +37,8 @@ net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
     sound.PlayURL(url, "noblock", function(station)
         if (IsValid(station)) then
             station:Play()
+            print(timestamp)
+            print(station:IsBlockStreamed())
             station:SetTime(timestamp, true)
             SONG = station
             station:GetVolume()
@@ -44,6 +49,20 @@ net.Receive("chicagoRP_vehicleradio_playsong", function(ply)
         end
     end)
 end)
+
+local function SendStation(enableradio, name)
+    net.Start("chicagoRP_vehicleradio_receiveindex")
+    net.WriteBool(enableradio)
+
+    if enableradio == false then net.SendToServer() return end
+
+    net.WriteString(name)
+    net.SendToServer()
+
+    print("station name sent!")
+
+    print(name)
+end
 
 net.Receive("chicagoRP_vehicleradio", function()
     local ply = LocalPlayer()
@@ -76,6 +95,9 @@ net.Receive("chicagoRP_vehicleradio", function()
     function motherFrame:Paint(w, h)
         chicagoRP.BlurBackground(self)
         draw.RoundedBox(8, 0, 0, w, h, Color(0, 0, 0, 0))
+        if IsValid(SONG) then
+            SONG:GetTime()
+        end
     end
 
     function motherFrame:OnClose()
@@ -115,14 +137,7 @@ net.Receive("chicagoRP_vehicleradio", function()
         categoryButton:SetSize(200, 50)
 
         function categoryButton:DoClick()
-            net.Start("chicagoRP_vehicleradio_receiveindex")
-            net.WriteBool(true)
-            net.WriteString(v.name)
-            net.SendToServer()
-
-            print("station name sent!")
-
-            print(v.name)
+            SendStation(true, v.name)
         end
     end
 
@@ -137,9 +152,7 @@ net.Receive("chicagoRP_vehicleradio", function()
             SONG:Stop()
             print("bitchslapped that wack ass song")
         end
-        net.Start("chicagoRP_vehicleradio_receiveindex")
-        net.WriteBool(false)
-        net.SendToServer()
+        SendStation(false)
     end
 
     local debugVOLSongButton = gameSettingsScrollPanel:Add("DButton")
