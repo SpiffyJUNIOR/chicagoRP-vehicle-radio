@@ -9,6 +9,10 @@ basic GUI + basic functionality, but limited and deeply buggy
 [] - base layout    
 [w] - song syncing    
 [w] - accurate track time    
+[] - proper sound networking    
+[] - convar/volume support    
+[] - random album/song insertion    
+[] - DJ/commerical support    
 [] - prettify    
 [] - animations?             
 [] - optimize    
