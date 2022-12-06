@@ -13,7 +13,7 @@ local music_list = music_list or {}
 local music_left = music_left or {}
 local next_song = next_song or ""
 
-local activeradio = activeradio or nil
+local activeradio = activeradio or false
 local debugmode = true
 local co_MusicHandler
 
@@ -59,9 +59,10 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("future StartPosition and NextSongTime set!")
 
-                if radioactive == true then
+                if activeradio == true then
                     PlaySong()
                 end
 
@@ -80,9 +81,10 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("initial StartPosition and NextSongTime set!")
 
-                if radioactive == true then
+                if activeradio == true then
                     PlaySong()
                 end
 
@@ -98,12 +100,15 @@ local function PlaySong(ply)
     if ply == nil then ply = Entity(1) end
 
     for _, v1 in ipairs(chicagoRP.radioplaylists) do
-        for _, v in ipairs(music_left[v1.name]) do
-            timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
-            -- PrintTable(timestamp)
-            -- print(StartPosition[v1.name])
-            -- print(SysTime())
-        end
+        -- for _, v in ipairs(music_left[v1.name]) do
+        --     timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
+        --     -- PrintTable(timestamp)
+        --     -- print(StartPosition[v1.name])
+        --     -- print(SysTime())
+        -- end
+        timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
+        PrintTable(timestamp)
+        print(StartPosition[v1.name])
     end
 
     PrintTable(music_left[secondindex])
@@ -112,14 +117,16 @@ local function PlaySong(ply)
         print(v2.url)
         print(v2.artist)
         print(v2.song)
-        print(IsValid(v2.url))
-        print(IsValid(v2.artist))
-        print(IsValid(v2.song))
+        -- print(IsValid(v2.url))
+        -- print(IsValid(v2.artist))
+        -- print(IsValid(v2.song))
         net.Start("chicagoRP_vehicleradio_playsong")
+        net.WriteBool(false)
         net.WriteString(v2.url)
         net.WriteString(v2.artist)
         net.WriteString(v2.song)
         for _, v3 in ipairs(chicagoRP.radioplaylists) do
+            print(timestamp[v3.name])
             net.WriteFloat(timestamp[v3.name]) -- how the fuck do we get timestamp[v.name]
 
             print("PlaySong timestamp loop ran!")
@@ -159,6 +166,7 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     if enabled == true then
         activeradio = true
         print("activeradio set to true")
+        print(activeradio)
     end
 
     local stationname = net.ReadString()
@@ -185,6 +193,15 @@ local function MusicHandler()
 end
 
 hook.Add("Tick", "chicagoRP_vehicleradio_tablelogicloop", MusicHandler)
+
+hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leftvehicle", function(ply, veh)
+    if activeradio == true then
+        activeradio = false
+        net.Start("chicagoRP_vehicleradio_playsong")
+        net.WriteBool(true)
+        net.Send(Entity(1))
+    end
+end)
 
 concommand.Add("chicagoRP_vehicleradio", function(ply)
     if !IsValid(ply) then return end

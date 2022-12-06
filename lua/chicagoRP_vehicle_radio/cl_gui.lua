@@ -13,6 +13,18 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
+
+    print("play song net received")
+
+    local stopsong = net.ReadBool()
+
+    if IsValid(SONG) then
+        SONG:Stop()
+        print("bitchslapped that weak song, say goodbye to your aux cord privileges")
+    end
+
+    if stopsong == true then return end
+
     local url = net.ReadString()
     local artist = net.ReadString()
     local songname = net.ReadString()
@@ -23,14 +35,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     print("Next Song: " .. songname)
     print("TimeStamp: " .. timestamp)
 
-    print("play song net received")
-
     math.Round(timestamp, 2)
-
-    if IsValid(SONG) then
-        SONG:Stop()
-        print("bitchslapped that weak song, say goodbye to your aux cord privileges")
-    end
 
     local g_station = nil
     print(url)
@@ -60,6 +65,8 @@ local function SendStation(enableradio, name)
     net.SendToServer()
 
     print("station name sent!")
+
+    print(enableradio)
 
     print(name)
 end
