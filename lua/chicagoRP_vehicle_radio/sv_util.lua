@@ -117,7 +117,7 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
+                -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("future StartPosition and NextSongTime set!")
 
                 if activeradio == true then
@@ -125,6 +125,8 @@ local function table_calculation()
                     print(timesran)
                     
                     PlaySong()
+
+                    break
                 end
 
                 break
@@ -142,7 +144,7 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
+                -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("initial StartPosition and NextSongTime set!")
 
                 if activeradio == true then
@@ -150,6 +152,8 @@ local function table_calculation()
                     print(timesran)
 
                     PlaySong()
+
+                    break
                 end
 
                 break
