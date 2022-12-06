@@ -49,51 +49,6 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
     end
 end
 
-local function table_calculation()
-    for _, v in ipairs(chicagoRP.radioplaylists) do
-        if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
-            print("attempted to remove song")
-
-            table.remove(music_left[v.name], 1)
-
-            for _, v2 in ipairs (music_left[v.name]) do
-                StartPosition[v.name] = SysTime()
-                NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
-                print("future StartPosition and NextSongTime set!")
-
-                if activeradio == true then
-                    PlaySong()
-                end
-
-                break
-            end
-
-            print("song removed")
-        end
-        if table.IsEmpty(music_left[v.name]) then
-            music_left[v.name] = table.Copy(music_list[v.name])
-
-            table.Shuffle(music_left[v.name])
-
-            print("music_left table regenerated")
-
-            for _, v2 in ipairs (music_left[v.name]) do
-                StartPosition[v.name] = SysTime()
-                NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
-                print("initial StartPosition and NextSongTime set!")
-
-                if activeradio == true then
-                    PlaySong()
-                end
-
-                break
-            end
-        end
-    end
-end
-
 local function PlaySong(ply)
     print("PlaySong ran!")
 
@@ -149,6 +104,57 @@ local function PlaySong(ply)
         end
 
         -- PrintTable(music_left)
+    end
+end
+
+local function table_calculation()
+    for _, v in ipairs(chicagoRP.radioplaylists) do
+        if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
+            print("attempted to remove song")
+
+            table.remove(music_left[v.name], 1)
+
+            for _, v2 in ipairs (music_left[v.name]) do
+                StartPosition[v.name] = SysTime()
+                NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
+                print("future StartPosition and NextSongTime set!")
+
+                if activeradio == true then
+                    local timesran = (timesran or 0) + 1
+                    print(timesran)
+                    
+                    PlaySong()
+                end
+
+                break
+            end
+
+            print("song removed")
+        end
+        if table.IsEmpty(music_left[v.name]) then
+            music_left[v.name] = table.Copy(music_list[v.name])
+
+            table.Shuffle(music_left[v.name])
+
+            print("music_left table regenerated")
+
+            for _, v2 in ipairs (music_left[v.name]) do
+                StartPosition[v.name] = SysTime()
+                NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
+                print("initial StartPosition and NextSongTime set!")
+
+                if activeradio == true then
+                    local timesran = (timesran or 0) + 1
+                    print(timesran)
+
+                    PlaySong()
+                end
+
+                break
+            end
+        end
     end
 end
 
