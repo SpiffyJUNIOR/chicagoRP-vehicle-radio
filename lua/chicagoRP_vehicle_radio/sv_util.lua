@@ -120,7 +120,9 @@ local function table_calculation()
                 -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("future StartPosition and NextSongTime set!")
 
-                if activeradio == true then
+                if activeradio == false or firstindex == nil then break end
+
+                if activeradio == true and v.name == firstindex then
                     local timesran = (timesran or 0) + 1
                     print(timesran)
                     
@@ -147,7 +149,9 @@ local function table_calculation()
                 -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("initial StartPosition and NextSongTime set!")
 
-                if activeradio == true then
+                if activeradio == false or firstindex == nil then break end
+
+                if activeradio == true and v.name == firstindex then
                     local timesran = (timesran or 0) + 1
                     print(timesran)
 
