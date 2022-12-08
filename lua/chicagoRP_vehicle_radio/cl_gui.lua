@@ -42,11 +42,16 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     sound.PlayURL(url, "noblock", function(station)
         if (IsValid(station)) then
             station:Play()
+            station:SetVolume(0)
             print(timestamp)
             print(station:IsBlockStreamed())
-            station:SetTime(timestamp, true)
             SONG = station
             station:GetVolume()
+            timer.Simple(0.1, function()
+                station:SetTime(200, true)
+                station:SetVolume(1.0)
+                print(station:GetTime())
+            end)
             print("song playing")
             g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
         else
@@ -173,6 +178,20 @@ net.Receive("chicagoRP_vehicleradio", function()
             SONG:GetVolume()
             SONG:SetVolume(math.random(0.1, 0.9))
             print("got vol")
+        end
+    end
+
+    local debugTIMESongButton = gameSettingsScrollPanel:Add("DButton")
+    debugTIMESongButton:SetText("SET SONG TIME")
+    debugTIMESongButton:Dock(TOP)
+    debugTIMESongButton:DockMargin(0, 10, 0, 0)
+    debugTIMESongButton:SetSize(200, 50)
+
+    function debugVOLSongButton:DoClick()
+        if IsValid(SONG) then
+            SONG:GetTime()
+            SONG:SetTime(30, true)
+            print("got + set time")
         end
     end
 
