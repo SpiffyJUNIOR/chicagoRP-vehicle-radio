@@ -58,6 +58,12 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
             LocalPlayer():ChatPrint("Invalid URL!")
         end
     end)
+    -- timer.Create("StationSetTime", 0, 0, function()
+    --     if station:GetTime() > 0.35 then
+    --         timer.Remove("StationSetTime")
+    --         station:SetTime(30)    
+    --     end
+    -- end)
 end)
 
 local function SendStation(enableradio, name)
