@@ -5,15 +5,15 @@ synchronous vehicle radio system for gmod
 basic GUI + basic functionality, but limited and deeply buggy
 
 # to-do
-[w] - base functionality    
-[] - base layout    
-[w] - song syncing    
-[w] - accurate track time    
-[] - proper sound networking    
-[] - convar/volume support    
-[] - random album/song insertion    
-[] - DJ/commerical support    
-[] - prettify    
-[] - animations?             
-[] - optimize    
-[] - write documentation and release    
+[wip] - base functionality                 
+[wip] - base layout                 
+[wip] - song syncing                 
+[wip] - accurate track time                 
+[wip] - proper sound networking                 
+[n/a] - convar/volume support                 
+[n/a] - random album/song insertion                 
+[n/a] - DJ/commerical support                 
+[n/a] - prettify                 
+[n/a] - animations?                 
+[n/a] - optimize                 
+[n/a] - write documentation and release                 

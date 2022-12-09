@@ -39,7 +39,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 
     local g_station = nil
     print(url)
-    sound.PlayURL(url, "noblock", function(station)
+    sound.PlayURL(url, "noblock", function(station) -- add fade in/out
         if (IsValid(station)) then
             station:Play()
             station:SetVolume(0)
@@ -66,7 +66,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     -- end)
 end)
 
-local function SendStation(enableradio, name)
+local function SendStation(enableradio, name) -- maybe create actual stopsong function
     net.Start("chicagoRP_vehicleradio_receiveindex")
     net.WriteBool(enableradio)
 
@@ -82,7 +82,7 @@ local function SendStation(enableradio, name)
     print(name)
 end
 
-net.Receive("chicagoRP_vehicleradio", function()
+net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
     local ply = LocalPlayer()
     if IsValid(OpenMotherFrame) then return end
     if !IsValid(ply) then return end
@@ -91,7 +91,7 @@ net.Receive("chicagoRP_vehicleradio", function()
 
     local screenwidth = ScrW()
     local screenheight = ScrH()
-    local motherFrame = vgui.Create("DFrame")
+    local motherFrame = vgui.Create("DFrame") -- switch to circles library, use code from freddy15's solution as an example
     motherFrame:SetSize(300, 500)
     motherFrame:SetVisible(true)
     motherFrame:SetDraggable(true)
@@ -147,7 +147,7 @@ net.Receive("chicagoRP_vehicleradio", function()
     local gameSettingsScrollPanel = vgui.Create("DScrollPanel", motherFrame)
     gameSettingsScrollPanel:Dock(FILL)
 
-    for _, v in ipairs(chicagoRP.radioplaylists) do
+    for _, v in ipairs(chicagoRP.radioplaylists) do -- get driver + passengers, sendtoserver for each player, then send back to client
         local categoryButton = gameSettingsScrollPanel:Add("DButton")
         categoryButton:SetText(v.name)
         categoryButton:Dock(TOP)
@@ -155,7 +155,9 @@ net.Receive("chicagoRP_vehicleradio", function()
         categoryButton:SetSize(200, 50)
 
         function categoryButton:DoClick()
-            SendStation(true, v.name)
+            timer.Simple(0.5, function()
+                SendStation(true, v.name)
+            end)
         end
     end
 
