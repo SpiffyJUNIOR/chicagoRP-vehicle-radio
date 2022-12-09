@@ -35,20 +35,17 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     print("Next Song: " .. songname)
     print("TimeStamp: " .. timestamp)
 
-    math.Round(timestamp, 2)
+    timestamp = math.Round(timestamp, 2) + 0.35
 
     local g_station = nil
-    print(url)
     sound.PlayURL(url, "noblock", function(station) -- add fade in/out
         if (IsValid(station)) then
             station:Play()
             station:SetVolume(0)
-            print(timestamp)
-            print(station:IsBlockStreamed())
             SONG = station
             station:GetVolume()
-            timer.Simple(0.1, function()
-                station:SetTime(200, true)
+            timer.Simple(0.35, function()
+                station:SetTime(timestamp, false)
                 station:SetVolume(1.0)
                 print(station:GetTime())
             end)
@@ -61,7 +58,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     -- timer.Create("StationSetTime", 0, 0, function()
     --     if station:GetTime() > 0.35 then
     --         timer.Remove("StationSetTime")
-    --         station:SetTime(30)    
+    --         station:SetTime(30, false)    
     --     end
     -- end)
 end)
@@ -76,10 +73,6 @@ local function SendStation(enableradio, name) -- maybe create actual stopsong fu
     net.SendToServer()
 
     print("station name sent!")
-
-    print(enableradio)
-
-    print(name)
 end
 
 net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
@@ -189,19 +182,21 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         end
     end
 
-    local debugTIMESongButton = gameSettingsScrollPanel:Add("DButton")
-    debugTIMESongButton:SetText("SET SONG TIME")
-    debugTIMESongButton:Dock(TOP)
-    debugTIMESongButton:DockMargin(0, 10, 0, 0)
-    debugTIMESongButton:SetSize(200, 50)
+    -- local debugTIMESongButton = gameSettingsScrollPanel:Add("DButton")
+    -- debugTIMESongButton:SetText("SET SONG TIME")
+    -- debugTIMESongButton:Dock(TOP)
+    -- debugTIMESongButton:DockMargin(0, 10, 0, 0)
+    -- debugTIMESongButton:SetSize(200, 50)
 
-    function debugVOLSongButton:DoClick()
-        if IsValid(SONG) then
-            SONG:GetTime()
-            SONG:SetTime(30, true)
-            print("got + set time")
-        end
-    end
+    -- function debugTIMESongButton:DoClick()
+    --     if IsValid(SONG) then
+    --         SONG:GetTime()
+    --         SONG:SetTime(157, false)
+    --         print("got + set time")
+    --     end
+    --     -- SONG:SetTime(240, false)
+    --     -- print("fuck you")
+    -- end
 
     OpenMotherFrame = motherFrame
 end)

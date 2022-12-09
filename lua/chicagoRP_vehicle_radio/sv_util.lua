@@ -15,7 +15,6 @@ local next_song = next_song or ""
 
 local activeradio = activeradio or false
 local debugmode = true
-local co_MusicHandler
 
 for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
     if !IsValid(music_list[v.name]) or table.IsEmpty(music_list[v.name]) then
@@ -23,7 +22,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
 
         music_list[v.name] = table.Copy(chicagoRP[v.name])
 
-        print("music_list table generated")
+        print("Source table generated!")
 
         PrintTable(music_list)
     end
@@ -35,12 +34,12 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
 
         table.Shuffle(music_left[v.name])
 
-        print("music_left table generated")
+        print("music_left table generated!")
 
         for _, v2 in ipairs (music_left[v.name]) do
             StartPosition[v.name] = SysTime()
             NextSongTime[v.name] = StartPosition[v.name] + v2.length
-            print("initial StartPosition and NextSongTime set!")
+            print("Inital StartPosition and NextSongTime set!")
 
             break
         end
@@ -54,78 +53,67 @@ local function PlaySong(ply)
 
     if ply == nil then ply = Entity(1) end
 
-    for _, v1 in ipairs(chicagoRP.radioplaylists) do
-        -- for _, v in ipairs(music_left[v1.name]) do
-        --     timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
-        --     -- PrintTable(timestamp)
-        --     -- print(StartPosition[v1.name])
-        --     -- print(SysTime())
-        -- end
-        timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
-        PrintTable(timestamp)
-        print(StartPosition[v1.name])
-    end
+    -- for _, v1 in ipairs(music_left[secondindex]) do
+    --     -- for _, v in ipairs(music_left[v1.name]) do
+    --     --     timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
+    --     --     -- PrintTable(timestamp)
+    --     --     -- print(StartPosition[v1.name])
+    --     --     -- print(SysTime())
+    --     -- end
+    --     timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    --     PrintTable(timestamp)
+    --     print(StartPosition[v1.name])
+    -- end
+
+    timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    PrintTable(timestamp)
+    print(StartPosition[secondindex])
 
     PrintTable(music_left[secondindex])
 
     for _, v2 in ipairs(music_left[secondindex]) do
-        print(v2.url)
-        print(v2.artist)
-        print(v2.song)
-        -- print(IsValid(v2.url))
-        -- print(IsValid(v2.artist))
-        -- print(IsValid(v2.song))
         net.Start("chicagoRP_vehicleradio_playsong")
         net.WriteBool(false)
         net.WriteString(v2.url)
         net.WriteString(v2.artist)
         net.WriteString(v2.song)
-        for _, v3 in ipairs(chicagoRP.radioplaylists) do
-            print(timestamp[v3.name])
-            net.WriteFloat(timestamp[v3.name]) -- how the fuck do we get timestamp[v.name]
+        print(timestamp[secondindex])
+        net.WriteFloat(timestamp[secondindex]) -- how the fuck do we get timestamp[v.name]
+        net.Send(ply) -- get players somehow
 
-            print("PlaySong timestamp loop ran!")
-
-            break
-        end
-        net.Send(Entity(1)) -- get players somehow
-
-        print("play song net sent")
+        print("PlaySong Net sent!")
 
         break
     end
 
-    if debugmode == true then
-        for _, v in ipairs(music_left[secondindex]) do
-            print(("CURRENT SONG: %s"):format(v.artist .. " - " .. v.song))
-            print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(v.length)))
+    -- if debugmode == true then
+    --     for _, v in ipairs(music_left[secondindex]) do
+    --         print(("CURRENT SONG: %s"):format(v.artist .. " - " .. v.song))
+    --         print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(v.length)))
 
-            break
-        end
+    --         break
+    --     end
 
-        -- PrintTable(music_left)
-    end
+    --     -- PrintTable(music_left)
+    -- end
 end
 
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
         if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
-            print("attempted to remove song")
-
             table.remove(music_left[v.name], 1)
 
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
                 -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
-                print("future StartPosition and NextSongTime set!")
+                print("Future StartPosition and NextSongTime set!")
 
                 if activeradio == false or firstindex == nil then break end
 
                 if activeradio == true and v.name == firstindex then
-                    local timesran = (timesran or 0) + 1
-                    print(timesran)
-                    
+                    print("Song played after previous ended")
+
                     PlaySong()
 
                     break
@@ -134,26 +122,25 @@ local function table_calculation()
                 break
             end
 
-            print("song removed")
+            print("Song removed")
         end
         if table.IsEmpty(music_left[v.name]) then
             music_left[v.name] = table.Copy(music_list[v.name])
 
             table.Shuffle(music_left[v.name])
 
-            print("music_left table regenerated")
+            print("Table regenerated")
 
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
                 -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
-                print("initial StartPosition and NextSongTime set!")
+                print("Regenerated StartPosition and NextSongTime set!")
 
                 if activeradio == false or firstindex == nil then break end
 
                 if activeradio == true and v.name == firstindex then
-                    local timesran = (timesran or 0) + 1
-                    print(timesran)
+                    print("Song played after table regen")
 
                     PlaySong()
 
@@ -179,13 +166,9 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
 
     if enabled == true then
         activeradio = true
-        print("activeradio set to true")
-        print(activeradio)
     end
 
     local stationname = net.ReadString()
-
-    print(stationname)
 
     firstindex = stationname
     secondindex = stationname
@@ -194,8 +177,6 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
 
     -- PrintTable(firstindex)
     -- PrintTable(secondindex)
-    print(firstindex)
-    print(secondindex)
 
     print("station name received!")
 end)
