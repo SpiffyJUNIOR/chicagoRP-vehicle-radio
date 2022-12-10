@@ -40,11 +40,17 @@ chicagoRP.idm = {
         song = "Do the Astral Plane",
         url = "https://files.catbox.moe/sduxdr.mp3"
     }, {
-        artist = "Autechre",
-        length = 519, -- 519
-        song = "Acroyear2",
-        url = "https://files.catbox.moe/s6xq61.mp3"
+        artist = "COUNTDOWN",
+        length = 100, -- 519
+        song = "CONTDOWN BBY",
+        url = "https://files.catbox.moe/10m6if.mp3"
     }
+    -- , {
+    --     artist = "Autechre",
+    --     length = 519, -- 519
+    --     song = "Acroyear2",
+    --     url = "https://files.catbox.moe/s6xq61.mp3"
+    -- }
 }
 
 chicagoRP.industrial_metal = {

@@ -65,7 +65,11 @@ local function PlaySong(ply)
     --     print(StartPosition[v1.name])
     -- end
 
-    timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    if StartPosition[secondindex] - SysTime() == 0 then
+        timestamp[secondindex] = 0
+    else
+        timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    end
     PrintTable(timestamp)
     print(StartPosition[secondindex])
 

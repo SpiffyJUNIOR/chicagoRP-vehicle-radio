@@ -35,7 +35,9 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     print("Next Song: " .. songname)
     print("TimeStamp: " .. timestamp)
 
-    timestamp = math.Round(timestamp, 2) + 0.35
+    local realtimestamp = math.Round(timestamp, 2) + 0.35
+
+    print(realtimestamp)
 
     local g_station = nil
     sound.PlayURL(url, "noblock", function(station) -- add fade in/out
@@ -45,7 +47,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
             SONG = station
             station:GetVolume()
             timer.Simple(0.35, function()
-                station:SetTime(timestamp, false)
+                station:SetTime(realtimestamp, false)
                 station:SetVolume(1.0)
                 print(station:GetTime())
             end)
