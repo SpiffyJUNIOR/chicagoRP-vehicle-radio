@@ -69,7 +69,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     -- end)
 end)
 
-local function SendStation(enableradio, name) -- maybe create actual stopsong function
+local function SendStation(name) -- maybe create actual stopsong function
     net.Start("chicagoRP_vehicleradio_receiveindex")
     net.WriteBool(enableradio)
 
@@ -79,6 +79,14 @@ local function SendStation(enableradio, name) -- maybe create actual stopsong fu
     net.SendToServer()
 
     print("station name sent!")
+end
+
+local function StopSong()
+    net.Start("chicagoRP_vehicleradio_receiveindex")
+    net.WriteBool(false)
+    net.SendToServer()
+
+    print("song stopped and index emptied")
 end
 
 local ELEMENTS = {}
@@ -185,7 +193,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         ElementsDestroy()
 
         for i = 1, count do
-            local rad = math.rad(d + arcdegrees * 1)
+            local rad = math.rad(d + arcdegrees * 0.50) -- why not power of 1 or 2?
             local x = scrw / 2 + math.cos(rad) * radius
             local y = scrh / 2 - math.sin(rad) * radius
             ElementsAdd(x, y, IconSize, 100)
@@ -241,13 +249,14 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
             -- third one
             -- radius: from 48 to 52
-            -- cursorX: from 0 to 1215
-            -- cursorY: from 0 to 495
+            -- cursorX: from 0 to 1212
+            -- cursorY: from 0 to 492
             -- X: 1260
             -- Y: 540
 
             -- make hovering similar to gta radio UI
-            if cursorx > x - radius and cursorx < x + radius and cursory > y - radius and cursory < y + radius then -- we need an OnCursorEntered function for this
+            if 1216 > 1260 - (48 / 2) and 1216 < 1260 + (48 / 2) and 493 > 540 - (48 / 2) and 493 < 540 + (48 / 2) then
+            if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then -- we need an OnCursorEntered function for this
                 HoverIndex = k
                 v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
@@ -315,7 +324,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
         function categoryButton:DoClick()
             timer.Simple(0.5, function()
-                SendStation(true, v.name)
+                SendStation(v.name)
             end)
         end
     end
@@ -331,7 +340,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
             SONG:Stop()
             print("bitchslapped that wack ass song")
         end
-        SendStation(false)
+        StopSong()
     end
 
     local debugVOLSongButton = gameSettingsScrollPanel:Add("DButton")
