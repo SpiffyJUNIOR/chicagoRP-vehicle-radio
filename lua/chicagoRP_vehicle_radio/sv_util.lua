@@ -1,6 +1,8 @@
 util.AddNetworkString("chicagoRP_vehicleradio")
-util.AddNetworkString("chicagoRP_vehicleradio_playsong")
+util.AddNetworkString("chicagoRP_vehicleradio_sendinfo")
+util.AddNetworkString("chicagoRP_vehicleradio_receiveinfo")
 util.AddNetworkString("chicagoRP_vehicleradio_receiveindex")
+util.AddNetworkString("chicagoRP_vehicleradio_playsong")
 
 local firstindex = firstindex or nil
 local secondindex = secondindex or nil
@@ -16,7 +18,9 @@ local next_song = next_song or ""
 local activeradio = activeradio or false
 local debugmode = true
 
-for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
+for _, v in ipairs(chicagoRP.radioplaylists) do
+    if !IsValid(chicagoRP[v.name]) then goto skip end
+
     if !IsValid(music_list[v.name]) or table.IsEmpty(music_list[v.name]) then
         music_list[v.name] = music_list[v.name] or {}
 
@@ -43,7 +47,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be
 
             break
         end
-
+        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
         -- PrintTable(music_left)
     end
 end
@@ -70,22 +74,27 @@ local function PlaySong(ply)
     else
         timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
     end
+
     PrintTable(timestamp)
     print(StartPosition[secondindex])
 
     PrintTable(music_left[secondindex])
 
     for _, v2 in ipairs(music_left[secondindex]) do
+        if !IsValid(music_left[secondindex]) then print("music_left list invalid!") goto skip end
+
         net.Start("chicagoRP_vehicleradio_playsong")
         net.WriteBool(false)
         net.WriteString(v2.url)
         net.WriteString(v2.artist)
         net.WriteString(v2.song)
         print(timestamp[secondindex])
-        net.WriteFloat(timestamp[secondindex]) -- how the fuck do we get timestamp[v.name]
+        net.WriteFloat(timestamp[secondindex])
         net.Send(ply) -- get players somehow
 
         print("PlaySong Net sent!")
+
+        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
 
         break
     end
@@ -104,6 +113,8 @@ end
 
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
+        if !IsValid(chicagoRP[v.name]) then goto skip end
+
         if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
             table.remove(music_left[v.name], 1)
 
@@ -154,6 +165,7 @@ local function table_calculation()
                 break
             end
         end
+        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
     end
 end
 
@@ -185,6 +197,27 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     print("station name received!")
 end)
 
+net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
+    print("fetchinfo received!")
+
+    local station = net.ReadString()
+
+    for _, v2 in ipairs(music_left[station]) do
+        if !IsValid(music_left[station]) then print("music_left list invalid!") goto skip end
+
+        net.Start("chicagoRP_vehicleradio_receiveinfo")
+        net.WriteString(v2.artist)
+        net.WriteString(v2.song)
+        net.Send(ply)
+
+        print("fetchinfo Net sent!")
+
+        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
+
+        break
+    end
+end)
+
 local function MusicHandler()
     -- print("SysTime: " .. SysTime())
     -- print("musichandler working")
@@ -209,7 +242,7 @@ concommand.Add("chicagoRP_vehicleradio", function(ply) -- how we close/open this
 end)
 
 concommand.Add("print_musiclist", function(ply)
-    for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
+    for _, v in ipairs(chicagoRP.radioplaylists) do
         PrintTable(music_list[v.name])
     end
     PrintTable(music_list)
@@ -217,7 +250,7 @@ concommand.Add("print_musiclist", function(ply)
 end)
 
 concommand.Add("print_musicleft", function(ply)
-    for _, v in ipairs(chicagoRP.radioplaylists) do -- entire table calc needs to be moved to serverside
+    for _, v in ipairs(chicagoRP.radioplaylists) do
         PrintTable(music_left[v.name])
     end
     PrintTable(music_left)
@@ -234,11 +267,14 @@ concommand.Add("print_timers", function(ply)
     print("timers printed")
     print("SysTime: " .. SysTime())
     for _, v in ipairs(chicagoRP.radioplaylists) do
+        if !IsValid(chicagoRP[v.name]) then goto skip end
+
         print(NextSongTime[v.name] <= SysTime())
         print(StartPosition[v.name])
         print("StartPosition^^^^^")
         print(NextSongTime[v.name])
         print("NextSongTime^^^^^")
+        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
     end
 end)
 
