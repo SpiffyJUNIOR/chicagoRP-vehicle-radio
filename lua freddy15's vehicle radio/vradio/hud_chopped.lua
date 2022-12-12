@@ -48,28 +48,51 @@ local function ElementHoverIndex()
     end
 end
 
-if IsValid(ply) and ply:Alive() and ply:InVehicle() then
-    local stations = table.GetKeys(chicagoRP.radioplaylists)
-    local count = #stations
+function VRADIO:OpenVGUI()
+    local ply = LocalPlayer()
 
-    if count > 0 then
-        local scrw, scrh = ScrW(), ScrH()
-        local arcdegrees = 360 / count
-        local radius = 300
-        local d = 360
-        ElementsDestroy()
+    if IsValid(ply) and ply:Alive() and ply:InVehicle() then
+        local stations = table.GetKeys(RADIO_STANTIONS)
+        local count = #stations
 
-        for i = 1, count do
-            local rad = math.rad(d + arcdegrees * 0.66)
-            local x = scrw / 2 + math.cos(rad) * radius
-            local y = scrh / 2 - math.sin(rad) * radius
-            ElementsAdd(x, y, IconSize, 100)
-            d = d - arcdegrees
+        if count > 0 then
+            local scrw, scrh = ScrW(), ScrH()
+            local arcdegrees = 360 / count
+            local radius = 300
+            local d = 360
+            VisibleVGUI = true
+            gui.EnableScreenClicker(true)
+            ElementsDestroy()
+
+            for i = 1, count do
+                local rad = math.rad(d + arcdegrees * 0.66)
+                local x = scrw / 2 + math.cos(rad) * radius
+                local y = scrh / 2 - math.sin(rad) * radius
+                ElementsAdd(x, y, IconSize, 100)
+                d = d - arcdegrees
+            end
+        else
+            notification.AddLegacy("You have not installed radio stations", 0, 3)
+            surface.PlaySound("buttons/button14.wav")
         end
-    else
-        notification.AddLegacy("You have not added any radio stations.", 0, 3)
-        surface.PlaySound("buttons/button14.wav")
     end
+end
+
+function VRADIO:CloseVGUI()
+    local ply = LocalPlayer()
+    VisibleVGUI = false
+
+    if IsValid(ply) and ply:Alive() and ply:InVehicle() then
+        local veh = VRADIO:GetCar(ply:GetVehicle())
+        local index = HoverIndex
+
+        if index then
+            surface.PlaySound("vehicles_radio/radio_noise.wav")
+            VRADIO:Play(veh, index, Volume)
+        end
+    end
+
+    gui.EnableScreenClicker(false)
 end
 
 function VRADIO:UpdateElementsSize()
@@ -135,7 +158,7 @@ hook.Add("HUDPaint", "VehiclesRadioVGUI", function() -- this is worldpanel
 
                 if CursorX > x - radius and CursorX < x + radius and CursorY > y - radius and CursorY < y + radius then
                     HoverIndex = k
-                    v.radius = Lerp(math.min(FrameTime() * 5, 1), v.radius, IconSize * 1.2)
+                    v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.2)
 
                     if clampedMul >= 1 then
                         draw.SimpleText(stationname, "VehiclesRadioVGUIFont", ScreenWidth + 1, ScreenHeight + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
@@ -172,9 +195,9 @@ hook.Add("HUDPaint", "VehiclesRadioVGUI", function() -- this is worldpanel
         --         icon = Material("gui/vehicles_radio_icons/volume_0.png")
         --     end
 
-        --     VolumeHit = Lerp(math.min(FrameTime() * 5, 1), VolumeHit, 0)
-        --     VolumeSlider = Lerp(math.min(FrameTime() * 5, 1), VolumeSlider, value)
-        --     VolumeSliderSize = Lerp(math.min(FrameTime() * 5, 1), VolumeSliderSize, 0)
+        --     VolumeHit = Lerp(math.min(RealFrameTime() * 5, 1), VolumeHit, 0)
+        --     VolumeSlider = Lerp(math.min(RealFrameTime() * 5, 1), VolumeSlider, value)
+        --     VolumeSliderSize = Lerp(math.min(RealFrameTime() * 5, 1), VolumeSliderSize, 0)
         --     draw.RoundedBox(25, ScreenWidth - height / 2, ScreenHeight - width / 2, height, width, Color(55, 55, 55, 100))
         --     render.SetScissorRect(ScreenWidth - height / 2, ScreenHeight + width / 2 - VolumeSlider, ScreenWidth - height / 2 + width, ScreenHeight - width / 2 + width, true)
         --     draw.RoundedBox(25, ScreenWidth - height / 2, ScreenHeight - width / 2, height, width, Color(255, 255, 255, 100))

@@ -202,7 +202,7 @@ hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leftvehicle", function(pl
     end
 end)
 
-concommand.Add("chicagoRP_vehicleradio", function(ply)
+concommand.Add("chicagoRP_vehicleradio", function(ply) -- how we close/open this based on bind being held?
     if !IsValid(ply) then return end
     net.Start("chicagoRP_vehicleradio")
     net.Send(ply)

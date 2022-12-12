@@ -1,16 +1,42 @@
 chicagoRP.radioplaylists = {
     {
+        icon = "chicagorp_vehicleradio/industrial_metal.png",
+        name = "alternative_metal",
+        printname = "Liberty City Metal"
+    }, {
+        icon = "chicagorp_vehicleradio/ambient.png",
         name = "ambient",
         printname = "Ambient FM"
     }, {
+        icon = "chicagorp_vehicleradio/idm.png",
         name = "idm",
         printname = "IDM FM"
     }, {
+        icon = "chicagorp_vehicleradio/industrial_metal.png",
         name = "industrial_metal",
         printname = "Industrial Noise FM"
     }, {
+        icon = "chicagorp_vehicleradio/new_wave.png",
         name = "new_wave",
         printname = "Poppin' FM"
+    }, {
+        icon = "chicagorp_vehicleradio/new_wave.png",
+        name = "synthpop",
+        printname = "Non Stop 80's"
+    }
+}
+
+chicagoRP.alternative_metal = {
+    {
+        artist = "Deftones",
+        length = 308, -- 262
+        song = "Be Quiet and Drive (Far Away)",
+        url = "https://files.catbox.moe/8xtxol.mp3"
+    }, {
+        artist = "System of a Down",
+        length = 216, -- 519
+        song = "Toxicity",
+        url = "https://files.catbox.moe/3yizkl.mp3"
     }
 }
 
@@ -40,17 +66,11 @@ chicagoRP.idm = {
         song = "Do the Astral Plane",
         url = "https://files.catbox.moe/sduxdr.mp3"
     }, {
-        artist = "COUNTDOWN",
-        length = 100, -- 519
-        song = "CONTDOWN BBY",
-        url = "https://files.catbox.moe/10m6if.mp3"
+        artist = "Autechre",
+        length = 519, -- 519
+        song = "Acroyear2",
+        url = "https://files.catbox.moe/s6xq61.mp3"
     }
-    -- , {
-    --     artist = "Autechre",
-    --     length = 519, -- 519
-    --     song = "Acroyear2",
-    --     url = "https://files.catbox.moe/s6xq61.mp3"
-    -- }
 }
 
 chicagoRP.industrial_metal = {
@@ -88,6 +108,20 @@ chicagoRP.new_wave = {
         length = 349, -- 349
         song = "Born Under Punches (The Heat Goes On)",
         url = "https://files.catbox.moe/4rfuv4.mp3"
+    }
+}
+
+chicagoRP.synthpop = {
+    {
+        artist = "Depeche Mode",
+        length = 372, -- 262
+        song = "Enjoy the Silence",
+        url = "https://files.catbox.moe/x1ncso.mp3"
+    }, {
+        artist = "MGMT",
+        length = 261, -- 519
+        song = "Time to Pretend",
+        url = "https://files.catbox.moe/zr32zq.mp3"
     }
 }
 
