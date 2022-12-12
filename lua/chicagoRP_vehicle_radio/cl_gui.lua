@@ -222,13 +222,42 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
             local stationname = chicagoRP.radioplaylists[k].printname
             -- draw.NoTexture()
 
-            if cursorx > x - radius and cursorx < x + radius and cursory > y - radius and cursory < y + radius then
+            print("CursorX: " .. cursorx)
+            print("CursorY: " .. cursory)
+
+            -- first one
+            -- radius: from 48 to 52
+            -- cursorX: from 0 to 760
+            -- cursorY: from 0 to 230
+            -- X: 810
+            -- Y: 280
+
+            -- second one
+            -- radius: from 48 to 52
+            -- cursorX: from 0 to 1065
+            -- cursorY: from 0 to 235
+            -- X: 1110
+            -- Y: 280
+
+            -- third one
+            -- radius: from 48 to 52
+            -- cursorX: from 0 to 1215
+            -- cursorY: from 0 to 495
+            -- X: 1260
+            -- Y: 540
+
+            -- make hovering similar to gta radio UI
+            if cursorx > x - radius and cursorx < x + radius and cursory > y - radius and cursory < y + radius then -- we need an OnCursorEntered function for this
                 HoverIndex = k
                 v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
+                print("X: " .. x)
+                print("Y: " .. y)
+                print("Radius: " .. radius)
                 HoverSound() -- how do we play this once
 
-                draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx, cy, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+                draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx, cy, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER) 
+                -- for grabbing artist/song, we send net with stationname to server immediately on hover, send back the info, then store it in local
 
                 surface.SetDrawColor(155, 155, 155, v.alpha * clampedMul)
             else
