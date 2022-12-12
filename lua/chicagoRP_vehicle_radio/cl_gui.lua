@@ -150,16 +150,6 @@ local function drawFilledCircle(x, y, radius, color)
     filled()
 end
 
-local function HoverSound()
-    local createdsound = CreateSound(game.GetWorld(), "chicagorp_settings/hover.wav", 0)
-    if createdsound then
-        createdsound:SetSoundLevel(0)
-        createdsound:Stop()
-        createdsound:Play()
-    end
-    return hoverslide
-end
-
 net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
     local ply = LocalPlayer()
     if IsValid(OpenMotherFrame) then OpenMotherFrame:Close() return end
@@ -211,17 +201,6 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
     function motherFrame:Paint(w, h)
         chicagoRP.BlurBackground(self)
-        -- draw.RoundedBox(8, 0, 0, w, h, Color(0, 0, 0, 0))
-        local cx = ScrW() / 2
-        local cy = ScrH() / 2
-        local cursorx, cursory = input.GetCursorPos()
-        -- local filledCircle = circles.New(CIRCLE_FILLED, 64, 400, 255)
-        -- filledCircle:SetDistance(1)
-        -- filledCircle:SetMaterial(true)
-        -- filledCircle:SetColor(reddebug)
-        -- filledCircle()
-        UpdateElementsSize()
-        HoverIndex = nil
         if IsValid(SONG) then
             SONG:GetTime()
         end
@@ -252,6 +231,8 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
             end
         end)
     end)
+
+    UpdateElementsSize()
 
     for k, v in pairs(ELEMENTS) do
         local x = v.x
@@ -301,17 +282,12 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         -- if 1216 > 1260 - (48 / 2) and 1216 < 1260 + (48 / 2) and 493 > 540 - (48 / 2) and 493 < 540 + (48 / 2) then
         -- if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then
         function stationButton:Paint(w, h)
+            local cx = ScrW() / 2
+            local cy = ScrH() / 2
+            local cursorx, cursory = input.GetCursorPos()
+
             if self:IsHovered() then -- we need an OnCursorEntered function for this
                 v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
-
-                timer.Simple(0.5, function()
-                    if IsValid(self) and self:IsHovered() and IsValid(chicagoRP.radioplaylists[k]) then
-                        net.Start("chicagoRP_vehicleradio_sendinfo")
-                        net.WriteString(chicagoRP.radioplaylists[k].name)
-                        net.SendToServer()
-                        SendStation(chicagoRP.radioplaylists[k].name)
-                    end
-                end)
 
                 if IsValid(stationname) then
                     draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx - 20, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
@@ -357,11 +333,16 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         end)
 
         function stationButton:OnCursorEntered()
-            if IsValid(k) then
-                HoverIndex = k
-            else
-                HoverIndex = true
-            end
+            surface.PlaySound("chicagorp_settings/hover.wav")
+
+            timer.Simple(0.5, function()
+                if IsValid(self) and self:IsHovered() and IsValid(chicagoRP.radioplaylists[k]) then
+                    net.Start("chicagoRP_vehicleradio_sendinfo")
+                    net.WriteString(chicagoRP.radioplaylists[k].name)
+                    net.SendToServer()
+                    SendStation(chicagoRP.radioplaylists[k].name)
+                end
+            end)
         end
 
     local gameSettingsScrollPanel = vgui.Create("DScrollPanel", motherFrame)
