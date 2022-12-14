@@ -355,6 +355,14 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
         function stationButton:OnCursorEntered()
             surface.PlaySound("chicagorp_settings/hover.wav")
+
+            if istable(chicagoRP.radioplaylists[k]) then
+                net.Start("chicagoRP_vehicleradio_sendinfo")
+                net.WriteString(chicagoRP.radioplaylists[k].name)
+                net.SendToServer()
+                print("sendinfo Net Sent!")
+            end
+
             if currentStation == chicagoRP.radioplaylists[k].name then return end
 
             timer.Simple(0.5, function()
@@ -363,10 +371,6 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
                 print(istable(chicagoRP.radioplaylists[k]))
                 print(chicagoRP.radioplaylists[k].name)
                 if IsValid(self) and self:IsHovered() and istable(chicagoRP.radioplaylists[k]) then
-                    net.Start("chicagoRP_vehicleradio_sendinfo")
-                    net.WriteString(chicagoRP.radioplaylists[k].name)
-                    net.SendToServer()
-                    print("sendinfo Net Sent!")
                     SendStation(chicagoRP.radioplaylists[k].name)
                     currentStation = chicagoRP.radioplaylists[k].name
                     currentStationPrintName = chicagoRP.radioplaylists[k].printname
