@@ -19,7 +19,7 @@ local activeradio = activeradio or false
 local debugmode = true
 
 for _, v in ipairs(chicagoRP.radioplaylists) do
-    if !IsValid(chicagoRP[v.name]) then goto skip end
+    -- if !IsValid(chicagoRP[v.name]) then goto skip end -- replace with continue/return before release
 
     if !IsValid(music_list[v.name]) or table.IsEmpty(music_list[v.name]) then
         music_list[v.name] = music_list[v.name] or {}
@@ -47,7 +47,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 
             break
         end
-        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
+        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
         -- PrintTable(music_left)
     end
 end
@@ -81,7 +81,7 @@ local function PlaySong(ply)
     PrintTable(music_left[secondindex])
 
     for _, v2 in ipairs(music_left[secondindex]) do
-        if !IsValid(music_left[secondindex]) then print("music_left list invalid!") goto skip end
+        -- if !IsValid(music_left[secondindex]) then print("music_left list invalid!") goto skip end
 
         net.Start("chicagoRP_vehicleradio_playsong")
         net.WriteBool(false)
@@ -94,7 +94,7 @@ local function PlaySong(ply)
 
         print("PlaySong Net sent!")
 
-        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
+        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
 
         break
     end
@@ -113,7 +113,7 @@ end
 
 local function table_calculation()
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        if !IsValid(chicagoRP[v.name]) then goto skip end
+        -- if !IsValid(chicagoRP[v.name]) then goto skip end
 
         if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
             table.remove(music_left[v.name], 1)
@@ -165,7 +165,7 @@ local function table_calculation()
                 break
             end
         end
-        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
+        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
     end
 end
 
@@ -203,7 +203,7 @@ net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
     local station = net.ReadString()
 
     for _, v2 in ipairs(music_left[station]) do
-        if !IsValid(music_left[station]) then print("music_left list invalid!") goto skip end
+        -- if !IsValid(music_left[station]) then print("music_left list invalid!") goto skip end
 
         net.Start("chicagoRP_vehicleradio_receiveinfo")
         net.WriteString(v2.artist)
@@ -212,7 +212,7 @@ net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
 
         print("fetchinfo Net sent!")
 
-        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
+        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
 
         break
     end
@@ -267,14 +267,14 @@ concommand.Add("print_timers", function(ply)
     print("timers printed")
     print("SysTime: " .. SysTime())
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        if !IsValid(chicagoRP[v.name]) then goto skip end
+        -- if !IsValid(chicagoRP[v.name]) then goto skip end
 
         print(NextSongTime[v.name] <= SysTime())
         print(StartPosition[v.name])
         print("StartPosition^^^^^")
         print(NextSongTime[v.name])
         print("NextSongTime^^^^^")
-        ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
+        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
     end
 end)
 

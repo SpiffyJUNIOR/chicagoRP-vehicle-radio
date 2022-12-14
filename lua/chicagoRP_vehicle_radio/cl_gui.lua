@@ -1,10 +1,50 @@
 local HideHUD = false
 local OpenMotherFrame = nil
+local currentStation = nil
+local currentStationPrintName = nil
 local SONG = SONG or nil
+local stationname = nil
+local artistname = nil
+local songname = nil
+local ELEMENTS = {}
+local IconSize = 48
+local minIconReduction = 20
+local Alpha = 0
+local MovementMul = 0
+local Dynamic = 0
+local reddebug = Color(200, 10, 10, 150)
+local graynormal = Color(20, 20, 20, 150)
+local grayhovered = Color(40, 40, 40, 100)
+local whitecolor = Color(255, 255, 255, 255)
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
+local blurMat = Material("pp/blurscreen")
+local HoverIndex
 
 -- PrintTable(circles)
+
+
+
+local function BlurBackground(panel)
+    if (!IsValid(panel) or !panel:IsVisible()) then return end
+    local layers, density, alpha = 1, 1, 100
+    local x, y = panel:LocalToScreen(0, 0)
+    local FrameRate, Num, Dark = 1 / RealFrameTime(), 5, 0
+
+    surface.SetDrawColor(255, 255, 255, alpha)
+    surface.SetMaterial(blurMat)
+
+    for i = 1, Num do
+        blurMat:SetFloat("$blur", (i / layers) * density * Dynamic)
+        blurMat:Recompute()
+        render.UpdateScreenEffectTexture()
+        surface.DrawTexturedRect(-x, -y, ScrW(), ScrH())
+    end
+
+    surface.SetDrawColor(0, 0, 0, Dark * Dynamic)
+    surface.DrawRect(0, 0, panel:GetWide(), panel:GetTall())
+    Dynamic = math.Clamp(Dynamic + (1 / FrameRate) * 7, 0, 1)
+end
 
 hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
     if HideHUD then
@@ -31,17 +71,17 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 
     local url = net.ReadString()
     local artist = net.ReadString()
-    local songname = net.ReadString()
+    local netsongname = net.ReadString()
     local timestamp = net.ReadFloat()
 
     print("URL: " .. url)
     print("Artist: " .. artist)
-    print("Next Song: " .. songname)
+    print("Song: " .. netsongname)
     print("TimeStamp: " .. timestamp)
 
     local realtimestamp = math.Round(timestamp, 2) + 0.35
 
-    if timestamp == 0 then -- silly, might be made useless because of timer.Simple delay
+    if timestamp <= 0 then -- silly, might be made useless because of timer.Simple delay
         realtimestamp = 0
     end
 
@@ -55,9 +95,12 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
             SONG = station
             station:GetVolume()
             timer.Simple(0.35, function()
-                station:SetTime(realtimestamp, false) -- fucking desync wtf???
-                station:SetVolume(1.0)
-                print(station:GetTime())
+                if IsValid(station) then
+                    station:SetTime(realtimestamp, false) -- fucking desync wtf???
+                    station:SetVolume(1.0)
+                    -- SONG:SetTime(realtimestamp, false) -- or this (don't work :skull:)
+                    print(station:GetTime())
+                end
             end)
             print("song playing")
             g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
@@ -65,20 +108,11 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
             LocalPlayer():ChatPrint("Invalid URL!")
         end
     end)
-    -- timer.Create("StationSetTime", 0, 0, function()
-    --     if station:GetTime() > 0.35 then
-    --         timer.Remove("StationSetTime")
-    --         station:SetTime(30, false)    
-    --     end
-    -- end)
 end)
 
 local function SendStation(name) -- maybe create actual stopsong function
     net.Start("chicagoRP_vehicleradio_receiveindex")
-    net.WriteBool(enableradio)
-
-    if enableradio == false then net.SendToServer() return end
-
+    net.WriteBool(true)
     net.WriteString(name)
     net.SendToServer()
 
@@ -92,17 +126,6 @@ local function StopSong()
 
     print("song stopped and index emptied")
 end
-
-local ELEMENTS = {}
-local IconSize = 48
-local minIconReduction = 20
-local Alpha = 0
-local MovementMul = 0
-local reddebug = Color(200, 10, 10, 150)
-local graynormal = Color(55, 55, 55, 0)
-local grayhovered = Color(155, 155, 155, 0)
-local whitecolor = Color(255, 255, 255, 255)
-local HoverIndex
 
 surface.CreateFont("VehiclesRadioVGUIFont", {
     font = "Roboto",
@@ -141,13 +164,18 @@ local function UpdateElementsSize()
     end
 end
 
-local function drawFilledCircle(x, y, radius, color)
+local function drawStationCircle(x, y, radius, color, k) -- nice af function, saves lots of trouble
     local filled = circles.New(CIRCLE_FILLED, radius, x, y)
     filled:SetDistance(1)
     filled:SetMaterial(true)
     filled:SetColor(color)
 
     filled()
+
+    local mat = Material(chicagoRP.radioplaylists[k].icon) -- cache these you fucking retard
+    surface.SetDrawColor(255, 255, 255, 255)
+    surface.SetMaterial(mat)
+    surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
 end
 
 net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
@@ -159,6 +187,8 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
     local screenwidth = ScrW()
     local screenheight = ScrH()
+    local cx = screenwidth / 2
+    local cy = screenheight / 2
     local motherFrame = vgui.Create("DFrame") -- switch to circles library, use code from freddy15's solution as an example
     motherFrame:SetSize(screenwidth, screenheight)
     motherFrame:SetVisible(true)
@@ -167,8 +197,9 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     motherFrame:SetTitle("Vehicle Radio")
     motherFrame:ParentToHUD()
     HideHUD = true
-
-    surface.PlaySound("chicagoRP_settings/back.wav")
+    stationname = currentStationPrintName or nil
+    artistname = artistname or nil
+    songname = songname or nil
 
     chicagoRP.PanelFadeIn(motherFrame, 0.15)
 
@@ -178,19 +209,18 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     motherFrame:Center()
 
     local stations = table.GetKeys(chicagoRP.radioplaylists)
-    local count = #stations + 1
+    local count = #stations
 
     if count > 0 then
-        local scrw, scrh = ScrW(), ScrH()
         local arcdegrees = 360 / count
         local radius = 300
         local d = 360
         ElementsDestroy()
 
         for i = 1, count do
-            local rad = math.rad(d + arcdegrees * 0.50) -- why not power of 1 or 2?
-            local x = scrw / 2 + math.cos(rad) * radius
-            local y = scrh / 2 - math.sin(rad) * radius
+            local rad = math.rad(d + arcdegrees * 0.50)
+            local x = cx + math.cos(rad) * radius
+            local y = cy - math.sin(rad) * radius
             ElementsAdd(x, y, IconSize, 100)
             d = d - arcdegrees
         end
@@ -199,12 +229,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         surface.PlaySound("buttons/button14.wav")
     end
 
-    function motherFrame:Paint(w, h)
-        chicagoRP.BlurBackground(self)
-        if IsValid(SONG) then
-            SONG:GetTime()
-        end
-    end
+    UpdateElementsSize()
 
     function motherFrame:OnClose()
         HideHUD = false
@@ -222,6 +247,23 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         end
     end
 
+    function motherFrame:Paint(w, h)
+        BlurBackground(self)
+        if IsValid(SONG) then
+            SONG:GetTime()
+        end
+        -- print(stationname)
+        -- print(IsValid(stationname))
+        -- print(isstring(stationname))
+        if isstring(stationname) then
+            draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx, cy - 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        end
+        if isstring(artistname) and isstring(songname) then
+            draw.SimpleText(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            draw.SimpleText(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+        end
+    end
+
     hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leavevehicle", function(ply, veh)
         motherFrame:AlphaTo(50, 0.15, 0)
         surface.PlaySound("chicagoRP_settings/back.wav")
@@ -232,30 +274,28 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         end)
     end)
 
-    UpdateElementsSize()
+    local artistcachedname = nil
+    local stationcachedname = nil
 
-    for k, v in pairs(ELEMENTS) do
+    for k, v in ipairs(ELEMENTS) do
         local x = v.x
         local y = v.y
         local clampedMul = 1
 
-        x = cx - (cx - v.x) * math.min(1, 1)
-        y = cy - (cy - v.y) * math.min(1, 1)
+        x = cx - (cx - v.x)
+        y = cy - (cy - v.y)
+
+        -- print(chicagoRP.radioplaylists[k])
 
         local radius = v.radius
-        local stationname = chicagoRP.radioplaylists[k].printname
-        local artistname = artistname or nil
-        local stationname = stationname or nil
+        local stationcachedname = chicagoRP.radioplaylists[k].printname
+        print(cx - (cx - v.x))
+        print(cy - (cy - v.y))
 
-        local stationButton = parent:Add("DButton")
+        local stationButton = motherFrame:Add("DButton")
         stationButton:SetText("")
-        stationButton:SetPos(x, y)
-        stationButton:SetSize(radius, radius)
-
-        -- draw.NoTexture()
-
-        print("CursorX: " .. cursorx)
-        print("CursorY: " .. cursory)
+        stationButton:SetSize(radius * 2.2, radius * 2.2)
+        stationButton:SetPos(x - (radius * 2.2) / 2, y - (radius * 2.2) / 2)
 
         -- first one
         -- radius: from 48 to 52
@@ -282,68 +322,66 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         -- if 1216 > 1260 - (48 / 2) and 1216 < 1260 + (48 / 2) and 493 > 540 - (48 / 2) and 493 < 540 + (48 / 2) then
         -- if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then
         function stationButton:Paint(w, h)
-            local cx = ScrW() / 2
-            local cy = ScrH() / 2
             local cursorx, cursory = input.GetCursorPos()
 
-            if self:IsHovered() then -- we need an OnCursorEntered function for this
+            DisableClipping(true)
+
+            -- print("CursorX: " .. cursorx)
+            -- print("CursorY: " .. cursory)
+
+            if self:IsHovered() then
                 v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
-                if IsValid(stationname) then
-                    draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx - 20, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-                else
-                    draw.SimpleText("Radio Off", "VehiclesRadioVGUIFont", cx - 20, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-                end
+                stationname = stationcachedname
+                artistname = artistcachedname
+                songname = songcachedname
 
-                if IsValid(stationname) and IsValid(artistname) and IsValid(songname) then
-                    draw.SimpleText(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-                    draw.SimpleText(songname, "VehiclesRadioVGUIFont", cx + 20, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-                end
-                -- for grabbing artist/song, we send net with stationname to server immediately on hover, send back the info, then store it in local
-
-                print("X: " .. x)
-                print("Y: " .. y)
-                print("Radius: " .. radius)
+                -- print("X: " .. x)
+                -- print("Y: " .. y)
+                -- print("Radius: " .. radius)
             else
                 v.radius = IconSize
             end
 
-            drawFilledCircle(x, y, v.radius * 1.2, graytransparent)
-            if IsValid(chicagoRP.radioplaylists[k]) then
-                local mat = Material(chicagoRP.radioplaylists[k].icon)
-                surface.SetDrawColor(255, 255, 255, 255 * clampedMul)
-                surface.SetMaterial(mat)
-                surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
-            else
-                local mat = Material("chicagorp_vehicleradio/ambient.png")
-                surface.SetDrawColor(255, 255, 255, 255 * clampedMul)
-                surface.SetMaterial(mat)
-                surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
+            -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10)) -- debug square
+            if self:IsHovered() then
+                drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
+            elseif self:IsHovered() then
+                drawStationCircle(w / 2, h / 2, v.radius * 1.2, grayhovered, k)
             end
 
             return nil
+        end
+
+        function stationButton:OnCursorEntered()
+            surface.PlaySound("chicagorp_settings/hover.wav")
+            if currentStation == chicagoRP.radioplaylists[k].name then return end
+
+            timer.Simple(0.5, function()
+                print(IsValid(self))
+                print(self:IsHovered())
+                print(istable(chicagoRP.radioplaylists[k]))
+                print(chicagoRP.radioplaylists[k].name)
+                if IsValid(self) and self:IsHovered() and istable(chicagoRP.radioplaylists[k]) then
+                    net.Start("chicagoRP_vehicleradio_sendinfo")
+                    net.WriteString(chicagoRP.radioplaylists[k].name)
+                    net.SendToServer()
+                    print("sendinfo Net Sent!")
+                    SendStation(chicagoRP.radioplaylists[k].name)
+                    currentStation = chicagoRP.radioplaylists[k].name
+                    currentStationPrintName = chicagoRP.radioplaylists[k].printname
+                end
+            end)
         end
 
         net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
             local artist = net.ReadString()
             local song = net.ReadString()
 
-            artistname = artist
-            songname = song
+            artistcachedname = artist
+            songcachedname = song
         end)
-
-        function stationButton:OnCursorEntered()
-            surface.PlaySound("chicagorp_settings/hover.wav")
-
-            timer.Simple(0.5, function()
-                if IsValid(self) and self:IsHovered() and IsValid(chicagoRP.radioplaylists[k]) then
-                    net.Start("chicagoRP_vehicleradio_sendinfo")
-                    net.WriteString(chicagoRP.radioplaylists[k].name)
-                    net.SendToServer()
-                    SendStation(chicagoRP.radioplaylists[k].name)
-                end
-            end)
-        end
+    end
 
     local gameSettingsScrollPanel = vgui.Create("DScrollPanel", motherFrame)
     gameSettingsScrollPanel:Dock(LEFT)
