@@ -9,21 +9,18 @@ local songname = nil
 local ELEMENTS = {}
 local IconSize = 48
 local minIconReduction = 20
-local Alpha = 0
-local MovementMul = 0
 local Dynamic = 0
 local reddebug = Color(200, 10, 10, 150)
 local graynormal = Color(20, 20, 20, 150)
 local grayhovered = Color(40, 40, 40, 100)
 local whitecolor = Color(255, 255, 255, 255)
+local gradientLeftColor = Color(230, 45, 40, 170)
+local gradientRightColor = Color(245, 135, 70, 170)
+local blurMat = Material("pp/blurscreen")
+local gradientLeftMat = Material("vgui/gradient-l") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
+local gradientRightMat = Material("vgui/gradient-r") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
-local blurMat = Material("pp/blurscreen")
-local HoverIndex
-
--- PrintTable(circles)
-
-
 
 local function BlurBackground(panel)
     if (!IsValid(panel) or !panel:IsVisible()) then return end
@@ -47,7 +44,7 @@ local function BlurBackground(panel)
 end
 
 hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
-    if HideHUD then
+    if HideHUD == true then
         return false
     end
 end)
@@ -150,12 +147,6 @@ local function ElementsAdd(x, y, radius, alpha)
     })
 end
 
-local function ElementHoverIndex()
-    for k, v in pairs(ELEMENTS) do
-        if v.hover then return k end
-    end
-end
-
 local function UpdateElementsSize()
     if #ELEMENTS > 12 then
         IconSize = 48 - (minIconReduction - minIconReduction / (#ELEMENTS - 12))
@@ -176,6 +167,17 @@ local function drawStationCircle(x, y, radius, color, k) -- nice af function, sa
     surface.SetDrawColor(255, 255, 255, 255)
     surface.SetMaterial(mat)
     surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
+end
+
+local function drawOutlineCircle(x, y, radius, thickness, color, material) -- nice af function, saves lots of trouble
+    if material == nil then material = true end
+
+    local outlined = circles.New(CIRCLE_OUTLINED, radius, x, y, thickness)
+    outlined:SetDistance(1)
+    outlined:SetColor(color)
+    outlined:SetMaterial(material)
+
+    outlined()
 end
 
 net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
@@ -232,6 +234,9 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     UpdateElementsSize()
 
     function motherFrame:OnClose()
+        if IsValid(self) then
+            chicagoRP.PanelFadeOut(motherFrame, 0.15)
+        end
         HideHUD = false
     end
 
@@ -275,12 +280,10 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     end)
 
     local artistcachedname = nil
-    local stationcachedname = nil
 
     for k, v in ipairs(ELEMENTS) do
         local x = v.x
         local y = v.y
-        local clampedMul = 1
 
         x = cx - (cx - v.x)
         y = cy - (cy - v.y)
@@ -321,15 +324,13 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         -- make hovering similar to gta radio UI
         -- if 1216 > 1260 - (48 / 2) and 1216 < 1260 + (48 / 2) and 493 > 540 - (48 / 2) and 493 < 540 + (48 / 2) then
         -- if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then
-        function stationButton:Paint(w, h)
-            local cursorx, cursory = input.GetCursorPos()
-
+        function stationButton:Paint(w, h) -- 230, 45, 40 and 245, 135, 70
+            local hovered = self:IsHovered()
+            local buf, step = self.__hoverBuf or 0, RealFrameTime() * 1
+            local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
             DisableClipping(true)
 
-            -- print("CursorX: " .. cursorx)
-            -- print("CursorY: " .. cursory)
-
-            if self:IsHovered() then
+            if hovered then
                 v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
                 stationname = stationcachedname
@@ -343,12 +344,48 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
                 v.radius = IconSize
             end
 
-            -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10)) -- debug square
-            if self:IsHovered() then
-                drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
-            elseif self:IsHovered() then
-                drawStationCircle(w / 2, h / 2, v.radius * 1.2, grayhovered, k)
+            -- print("CursorX: " .. cursorx)
+            -- print("CursorY: " .. cursory)
+
+            if hovered and buf < 1 then
+                buf = math.min(1, step + buf)
+            elseif !hovered and buf > 0 then
+                buf = math.max(0, buf - step)
             end
+
+            self.__hoverBuf = buf
+            buf = math.EaseInOut(buf, 0.2, 0.2)
+            local alpha, clr = Lerp(buf, 150, 100), Lerp(buf, 20, 40)
+
+            graynormal.r = clr
+            graynormal.g = clr
+            graynormal.b = clr
+            graynormal.a = alpha
+
+            drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
+
+            if hovered and Outlinebuf < 1 then
+                Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
+            elseif !hovered and Outlinebuf > 0 then
+                Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
+            end
+
+            self.__hoverOutlineBuf = Outlinebuf
+            Outlinebuf = math.EaseInOut(Outlinebuf, 0.5, 0.5)
+            local alphaOutline = Lerp(Outlinebuf, 0, 170)
+
+            gradientLeftColor.a = alphaOutline
+            gradientRightColor.a = alphaOutline
+
+            drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 50, gradientLeftColor, gradientLeftMat)
+            drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 50, gradientRightColor, gradientRightMat)
+
+            -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10)) -- debug square
+            -- if !hovered then
+            --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
+            -- elseif hovered then
+            --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, grayhovered, k)
+            -- end
 
             return nil
         end
@@ -439,3 +476,14 @@ end)
 print("chicagoRP GUI loaded!")
 
 -- to-do:
+-- fix out of range timestamp caused by math.abs
+-- fix previous stations song continuing to play
+-- find GTA 5 radio font
+-- add proper sound networking (simfphys and svmod support, MAYBE vcmod but it has bad documentation + i can't test it)
+-- add random station upon entering vehicle
+-- add volume convar + disable convar + disable random station convar
+-- add random chance of album being inserted
+-- add DJ/commerical support
+-- fix HUDPaint not returning false
+-- make layout pos and size match GTA 5's
+-- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
