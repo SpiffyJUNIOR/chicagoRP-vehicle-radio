@@ -14,6 +14,7 @@ local reddebug = Color(200, 10, 10, 150)
 local graynormal = Color(20, 20, 20, 150)
 local grayhovered = Color(40, 40, 40, 100)
 local whitecolor = Color(255, 255, 255, 255)
+local blackcolor = Color(0, 0, 0, 255)
 local gradientLeftColor = Color(230, 45, 40, 170)
 local gradientRightColor = Color(245, 135, 70, 170)
 local blurMat = Material("pp/blurscreen")
@@ -260,11 +261,14 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         -- print(IsValid(stationname))
         -- print(isstring(stationname))
         if isstring(stationname) then
-            draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx, cy - 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            -- draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx, cy - 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            draw.SimpleTextOutlined(stationname, "VehiclesRadioVGUIFont", cx, cy - 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
         end
         if isstring(artistname) and isstring(songname) then
-            draw.SimpleText(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-            draw.SimpleText(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            -- draw.SimpleText(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            -- draw.SimpleText(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+            draw.SimpleTextOutlined(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
+            draw.SimpleTextOutlined(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
         end
     end
 
