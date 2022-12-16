@@ -125,8 +125,7 @@ local function StopSong()
 end
 
 surface.CreateFont("VehiclesRadioVGUIFont", {
-    font = "Roboto",
-    dc = false,
+    font = "CologneSixty", -- replace later with GPL compatible font
     size = 36,
     weight = 500,
     blursize = 0,
