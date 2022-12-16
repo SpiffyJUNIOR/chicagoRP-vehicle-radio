@@ -8,6 +8,22 @@ chicagoRP.radioplaylists = {
         name = "ambient",
         printname = "Ambient FM"
     }, {
+        icon = "chicagorp_vehicleradio/ambient.png",
+        name = "atmospheric_drum_and_bass",
+        printname = "Good Looking Records"
+    }, {
+        icon = "chicagorp_vehicleradio/idm.png",
+        name = "avant_garde_jazz",
+        printname = "Tzadik FM"
+    }, {
+        icon = "chicagorp_vehicleradio/industrial_metal.png",
+        name = "death_metal",
+        printname = "Earache"
+    }, {
+        icon = "chicagorp_vehicleradio/idm.png",
+        name = "detroit_techno",
+        printname = "detroitMC lolmao"
+    }, {
         icon = "chicagorp_vehicleradio/idm.png",
         name = "idm",
         printname = "IDM FM"
@@ -56,6 +72,72 @@ chicagoRP.ambient = {
         length = 611, -- 611
         song = "Stone in Focus",
         url = "https://files.catbox.moe/w4ih54.mp3"
+    }
+}
+
+chicagoRP.atmospheric_drum_and_bass = {
+    {
+        artist = "Goldie",
+        length = 1263, -- 440
+        song = "Timeless",
+        url = "https://files.catbox.moe/rk5cu8.mp3"
+    }, {
+        artist = "Jacob's Optical Stairway",
+        length = 301, -- 357
+        song = "The Fusion Formula (The Metamorphosis)",
+        url = "https://files.catbox.moe/b9jsbm.mp3"
+    }, {
+        artist = "Source Direct",
+        length = 483, -- 611
+        song = "Secret Liaison",
+        url = "https://files.catbox.moe/j1t3kp.mp3"
+    }
+}
+
+chicagoRP.avant_garde_jazz = {
+    {
+        artist = "John Zorn",
+        length = 140, -- 262
+        song = "Snagglepuss",
+        url = "https://files.catbox.moe/awpr3e.mp3"
+    }, {
+        artist = "Ornette Coleman",
+        length = 302, -- 519
+        song = "Lonely Woman",
+        url = "https://files.catbox.moe/oemhyj.mp3"
+    }
+}
+
+chicagoRP.death_metal = {
+    {
+        artist = "Death",
+        length = 380, -- 262
+        song = "Leprosy",
+        url = "https://files.catbox.moe/dml982.mp3"
+    }, {
+        artist = "Morbid Angel",
+        length = 243, -- 519
+        song = "Immortal Rites",
+        url = "https://files.catbox.moe/51kerc.mp3"
+    }
+}
+
+chicagoRP.detroit_techno = {
+    {
+        artist = "Drexciya",
+        length = 319, -- 262
+        song = "Habitat 'O' Negative",
+        url = "https://files.catbox.moe/d0cgov.mp3"
+    }, {
+        artist = "Galaxy 2 Galaxy",
+        length = 255, -- 519
+        song = "Hi-Tech Jazz (The Elements)",
+        url = "https://files.catbox.moe/mrta9h.mp3"
+    }, {
+        artist = "World 2 World",
+        length = 267, -- 519
+        song = "Jupiter Jazz",
+        url = "https://files.catbox.moe/s3x81v.mp3"
     }
 }
 

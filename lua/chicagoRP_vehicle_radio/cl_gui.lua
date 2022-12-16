@@ -44,11 +44,81 @@ local function BlurBackground(panel)
     Dynamic = math.Clamp(Dynamic + (1 / FrameRate) * 7, 0, 1)
 end
 
-hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
-    if HideHUD == true then
-        return false
+local function GetSimfphysPassengers(vehicle)
+    local ply = LocalPlayer()
+    if !IsValid(ply) then return end
+    if !IsValid(vehicle) then return end
+    if !ply:InVehicle() then return end
+    if !IsValid(ply:GetVehicle():GetParent()) then return end
+
+    local plytable = {}
+    local parent = vehicle:GetParent()
+    local children = parent:GetChildren()
+    local count = #children
+
+    for i = 1, count do
+        local passenger = children:GetDriver()
+        if IsValid(passenger) then
+            table.insert(plytable, passenger)
+        end
     end
-end)
+
+    return plytable
+end
+
+local function GetPassengerTable(vehicle)
+    local ply = LocalPlayer()
+    if !IsValid(ply) then return end
+    if !IsValid(vehicle) then return end
+    if !ply:InVehicle() then return end
+
+    local finaltable = nil
+
+    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
+        if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
+            finaltable = GetSimfphysPassengers(vehicle)
+            if IsValid(finaltable) then
+                return finaltable
+            end
+        end
+    elseif SVMOD:GetAddonState() == true then
+        finaltable = vehicle:SV_GetAllPlayers()
+        if IsValid(finaltable) then
+            return finaltable
+        end
+    else return vehicle:GetDriver() end
+end
+
+local function IsDriver(vehicle)
+    local ply = LocalPlayer()
+    if !IsValid(ply) then return end
+    if !IsValid(vehicle) then return end
+    if !ply:InVehicle() then return end
+
+    local driver = false
+
+    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
+        if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
+            driver = ply:IsDrivingSimfphys()
+            if IsValid(driver) and driver == true then
+                driver = true
+                return driver
+            elseif !IsValid(driver) or driver == false then
+                driver = false
+                return driver
+            end
+        end
+    elseif SVMOD:GetAddonState() == true then
+        driver = vehicle:SV_GetDriverSeat()
+        if IsValid(driver) and driver == ply then
+            driver = true
+            return driver
+        elseif !IsValid(driver) or driver != ply then
+            driver = false
+            return driver
+        end
+    else driver = true return driver end
+end
 
 net.Receive("chicagoRP_vehicleradio_playsong", function()
     local ply = LocalPlayer()
@@ -109,9 +179,22 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 end)
 
 local function SendStation(name) -- maybe create actual stopsong function
+    local ply = LocalPlayer()
+    if !IsValid(ply) then return end
+    if !IsValid(vehicle) then return end
+    if !ply:InVehicle() then return end
+
+    local vehicle = ply:GetVehicle()
+    local passengertable = GetPassengerTable(vehicle)
+
+    PrintTable(passengertable)
+
+    -- instead of sending table to server, just do a table loop to send multiple net msgs, one for each player
+
     net.Start("chicagoRP_vehicleradio_receiveindex")
     net.WriteBool(true)
     net.WriteString(name)
+    net.WriteString(passengertable)
     net.SendToServer()
 
     print("station name sent!")
@@ -122,11 +205,20 @@ local function StopSong()
     net.WriteBool(false)
     net.SendToServer()
 
+    if IsValid(SONG) then
+        SONG:Stop()
+    end
+
+    currentStation = nil
+    stationname = nil
+    artistname = nil
+    songname = nil
+
     print("song stopped and index emptied")
 end
 
 surface.CreateFont("VehiclesRadioVGUIFont", {
-    font = "CologneSixty", -- replace later with GPL compatible font
+    font = "ChaletComprime-CologneSixty", -- replace later with GPL compatible font
     size = 36,
     weight = 500,
     blursize = 0,
@@ -180,17 +272,37 @@ local function drawOutlineCircle(x, y, radius, thickness, color, material) -- ni
     outlined()
 end
 
+hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
+    if HideHUD == true then
+        return false
+    end
+end)
+
+hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leavevehicle", function(ply, veh)
+    surface.PlaySound("chicagoRP_settings/back.wav")
+
+    StopSong()
+
+    timer.Simple(0.15, function()
+        if IsValid(OpenMotherFrame) then
+            OpenMotherFrame:Close()
+        end
+    end)
+end)
+
 net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
     local ply = LocalPlayer()
     if IsValid(OpenMotherFrame) then OpenMotherFrame:Close() return end
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
+    if (!IsDriver(ply:GetVehicle())) then return end
 
     local screenwidth = ScrW()
     local screenheight = ScrH()
     local cx = screenwidth / 2
     local cy = screenheight / 2
+    local vehicle = ply:GetVehicle()
     local motherFrame = vgui.Create("DFrame") -- switch to circles library, use code from freddy15's solution as an example
     motherFrame:SetSize(screenwidth, screenheight)
     motherFrame:SetVisible(true)
@@ -242,7 +354,6 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
     function motherFrame:OnKeyCodePressed(key)
         if key == KEY_ESCAPE or key == KEY_Q then
-            self:AlphaTo(50, 0.15, 0)
             surface.PlaySound("chicagoRP_settings/back.wav")
             timer.Simple(0.15, function()
                 if IsValid(self) then
@@ -271,16 +382,6 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
             draw.SimpleTextOutlined(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
         end
     end
-
-    hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leavevehicle", function(ply, veh)
-        motherFrame:AlphaTo(50, 0.15, 0)
-        surface.PlaySound("chicagoRP_settings/back.wav")
-        timer.Simple(0.15, function()
-            if IsValid(motherFrame) then
-                motherFrame:Close()
-            end
-        end)
-    end)
 
     local artistcachedname = nil
 
@@ -479,10 +580,9 @@ end)
 print("chicagoRP GUI loaded!")
 
 -- to-do:
--- fix out of range timestamp caused by math.abs
--- fix previous stations song continuing to play
--- find GTA 5 radio font
--- add proper sound networking (simfphys and svmod support, MAYBE vcmod but it has bad documentation + i can't test it)
+-- fix out of range timestamp
+-- fix previous stations song continuing to play (idk what causes this)
+-- add proper sound networking (simfphys and svmod support)
 -- add random station upon entering vehicle
 -- add volume convar + disable convar + disable random station convar
 -- add random chance of album being inserted

@@ -70,8 +70,13 @@ local function PlaySong(ply)
     -- end
 
     if StartPosition[secondindex] - SysTime() == 0 then
+        print(StartPosition[secondindex])
+        print("timestamp = 0")
         timestamp[secondindex] = 0
     else
+        print(StartPosition[secondindex])
+        print(SysTime())
+        print("timestamp > 0")
         timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
     end
 
@@ -178,7 +183,12 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
 
     local enabled = net.ReadBool()
 
-    if enabled == false then activeradio = false return end
+    if enabled == false then 
+        activeradio = false
+        firstindex = nil
+        secondindex = nil
+        return end
+    end
 
     if enabled == true then
         activeradio = true
