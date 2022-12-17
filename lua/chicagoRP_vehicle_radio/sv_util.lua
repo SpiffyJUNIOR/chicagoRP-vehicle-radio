@@ -14,33 +14,30 @@ local timestamp = timestamp or {}
 
 local music_list = music_list or {}
 local music_left = music_left or {}
-local next_song = next_song or ""
 
-local activeradio = activeradio or false
+local activeradio = activeradio or false -- might cause issues with multiple players
 local debugmode = true
 
 local scriptenabled = GetConVar("sv_chicagoRP_vehicleradio_enable"):GetBool()
 local randomstation = GetConVar("sv_chicagoRP_vehicleradio_randomstation"):GetBool()
 
-local function GetRealVehicle(vehicle)
-    local ply = LocalPlayer()
+local function GetRealVehicle(vehicle, ply)
     if !IsValid(ply) then return end
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then -- no GetSimfphysState function so we do convar check
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
            return ply:GetVehicle():GetParent()
-        end
-    elseif SVMOD:GetAddonState() == true then
-        if SVMOD:IsVehicle(vehicle) then
+        elseif SVMOD and SVMOD:IsVehicle(vehicle) then
             return vehicle:SV_GetDriverSeat():GetParent()
+        else
+            return ply:GetVehicle()
         end
-    else return vehicle end
+    end
 end
 
-local function GetSimfphysPassengers(vehicle)
-    local ply = LocalPlayer()
+local function GetSimfphysPassengers(vehicle, ply)
     if !IsValid(ply) then return end
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
@@ -51,8 +48,11 @@ local function GetSimfphysPassengers(vehicle)
     local children = parent:GetChildren()
     local count = #children
 
+    print(parent)
+    PrintTable(children)
+
     for i = 1, count do
-        local passenger = children:GetDriver()
+        local passenger = children[i]:GetDriver()
         if IsValid(passenger) then
             table.insert(plytable, passenger)
         end
@@ -61,8 +61,7 @@ local function GetSimfphysPassengers(vehicle)
     return plytable
 end
 
-local function GetPassengerTable(vehicle)
-    local ply = LocalPlayer()
+local function GetPassengerTable(vehicle, ply)
     if !IsValid(ply) then return end
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
@@ -71,7 +70,7 @@ local function GetPassengerTable(vehicle)
 
     if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
-            return GetSimfphysPassengers(vehicle)
+            return GetSimfphysPassengers(vehicle, ply)
         end
     elseif SVMOD:GetAddonState() == true then
         if SVMOD:IsVehicle(vehicle) then
@@ -250,19 +249,20 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     if !scriptenabled then return end
 
     local vehicle = ply:GetVehicle()
-    local actualvehicle = GetRealVehicle(vehicle)
-    local passengertable = GetPassengerTable(vehicle)
+    local actualvehicle = GetRealVehicle(vehicle, ply)
+    local passengertable = GetPassengerTable(vehicle, ply)
 
     print("receiveindex received")
 
     local enabled = net.ReadBool()
 
-    if enabled == false then 
+    if enabled == false then
         activeradio = false
         firstindex = nil
         secondindex = nil
-        return end
     end
+
+    if enabled == false then return end -- fucking syntax
 
     if enabled == true then
         activeradio = true
@@ -276,9 +276,9 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     actualvehicle:SetNW2String("currentstation", stationname)
 
     for k, v in ipairs(passengertable) do
-        print(k)
+        PrintTable(passengertable)
         print(v)
-        PlaySong(k)
+        PlaySong(v)
     end
 
     -- PrintTable(firstindex)
@@ -317,23 +317,33 @@ end
 hook.Add("Tick", "chicagoRP_vehicleradio_tablelogicloop", MusicHandler)
 
 hook.Add("PlayerEnteredVehicle", "chicagoRP_vehicleradio_leftvehicle", function(ply, veh, role)
-    local actualvehicle = GetRealVehicle(veh)
-    local statonname = actualvehicle:GetNW2String("currentstation")
+    local actualvehicle = GetRealVehicle(veh, ply)
+    local stationname = actualvehicle:GetNW2String("currentstation")
+
+    print(stationname)
+    print("PlayerEnteredVehicle Cached^^^")
 
     if !scriptenabled then return end
 
-    if stationname == nil and randomstation then
+    if !IsValid(stationname) and randomstation then
         for _, v in RandomPairs(chicagoRP.radioplaylists) do
             stationname = v.name
+
+            -- print("AEUFKHBJJHEGBFHSJFJBHSDF")
+
+            -- print(stationname)
+            -- print("PlayerEnteredVehicle RandomPairs^^^")
 
             break
         end
     end
 
-    if stationname = nil then return end
+    if stationname == nil then return end
 
     firstindex = stationname
     secondindex = stationname
+
+    print("SecondIndex " .. secondindex)
 
     activeradio = true
 
@@ -344,6 +354,7 @@ hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leftvehicle", function(pl
     if !scriptenabled then return end
 
     net.Start("chicagoRP_vehicleradio")
+    net.WriteBool(false)
     net.Send(ply)
 
     if activeradio == true then
@@ -356,6 +367,7 @@ end)
 concommand.Add("chicagoRP_vehicleradio", function(ply) -- how we close/open this based on bind being held?
     if !IsValid(ply) then return end
     net.Start("chicagoRP_vehicleradio")
+    net.WriteBool(true)
     net.Send(ply)
 end)
 

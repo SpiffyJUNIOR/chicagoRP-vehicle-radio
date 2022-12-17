@@ -39,6 +39,10 @@ chicagoRP.radioplaylists = {
         icon = "chicagorp_vehicleradio/new_wave.png",
         name = "synthpop",
         printname = "Non Stop 80's"
+    }, {
+        icon = "chicagorp_vehicleradio/new_wave.png",
+        name = "cringe",
+        printname = "dupe station"
     }
 }
 
@@ -105,6 +109,20 @@ chicagoRP.avant_garde_jazz = {
         length = 302, -- 519
         song = "Lonely Woman",
         url = "https://files.catbox.moe/oemhyj.mp3"
+    }
+}
+
+chicagoRP.cringe = {
+    {
+        artist = "Death",
+        length = 380, -- 262
+        song = "Leprosy",
+        url = "https://files.catbox.moe/dml982.mp3"
+    }, {
+        artist = "Morbid Angel",
+        length = 243, -- 519
+        song = "Immortal Rites",
+        url = "https://files.catbox.moe/51kerc.mp3"
     }
 }
 

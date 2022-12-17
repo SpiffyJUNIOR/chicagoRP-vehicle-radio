@@ -21,6 +21,7 @@ local gradientRightColor = Color(245, 135, 70, 170)
 local blurMat = Material("pp/blurscreen")
 local gradientLeftMat = Material("vgui/gradient-l") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
 local gradientRightMat = Material("vgui/gradient-r") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
+local radioOffMat = Material("chicagorp_vehicleradio/radiooff.png", "smooth")
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
 
@@ -51,15 +52,15 @@ local function GetRealVehicle(vehicle)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then -- no GetSimfphysState function so we do convar check
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
            return ply:GetVehicle():GetParent()
-        end
-    elseif SVMOD:GetAddonState() == true then
-        if SVMOD:IsVehicle(vehicle) then
+        elseif SVMOD and SVMOD:IsVehicle(vehicle) then
             return vehicle:SV_GetDriverSeat():GetParent()
+        else
+            return ply:GetVehicle()
         end
-    else return vehicle end
+    end
 end
 
 local function GetSimfphysPassengers(vehicle)
@@ -75,7 +76,7 @@ local function GetSimfphysPassengers(vehicle)
     local count = #children
 
     for i = 1, count do
-        local passenger = children:GetDriver()
+        local passenger = children[i]:GetDriver()
         if IsValid(passenger) then
             table.insert(plytable, passenger)
         end
@@ -103,42 +104,53 @@ local function GetPassengerTable(vehicle)
     else return vehicle:GetDriver() end
 end
 
-local function IsDriver(vehicle)
-    local ply = LocalPlayer()
+local function IsDriver(vehicle, ply)
     if !IsValid(ply) then return end
+    print(IsValid(vehicle))
     if !IsValid(vehicle) then return end
+    print(ply:InVehicle())
     if !ply:InVehicle() then return end
 
     local driver = false
 
-    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then -- no GetSimfphysState function so we do convar check
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
             driver = ply:IsDrivingSimfphys()
-            if IsValid(driver) and driver == true then
-                driver = true
+            print(ply:IsDrivingSimfphys())
+            if driver == true then -- errored
                 return driver
-            elseif !IsValid(driver) or driver == false then
+            elseif driver == nil or driver == false then
                 driver = false
                 return driver
             end
-        end
-    elseif SVMOD:GetAddonState() == true then
-        driver = vehicle:SV_GetDriverSeat()
-        if IsValid(driver) and driver == ply then
-            driver = true
-            return driver
-        elseif !IsValid(driver) or driver != ply then
-            driver = false
-            return driver
-        end
-    else driver = true return driver end
+        elseif SVMOD and SVMOD:IsVehicle(vehicle) then
+            driver = vehicle:SV_GetDriverSeat():GetDriver()
+            if driver != nil and driver == ply then
+                driver = true
+                return driver
+            elseif driver == nil or driver != ply then
+                driver = false
+                return driver
+            end
+        else driver = true return driver end
+    end
 end
 
 net.Receive("chicagoRP_vehicleradio_playsong", function()
     local ply = LocalPlayer()
+    print("PlaySong Net received!")
+
+    -- print(IsValid(ply))
+    -- print("Player Valid^^^")
+    -- print(IsValid(ply:GetVehicle()))
+    -- print("Vehicle Valid^^^")
+    -- print(ply:InVehicle())
+    -- print("Player InVehicle^^^")
+    -- print(enabled)
+    -- print("Script Enabled^^^")
     if !IsValid(ply) then return end
-    if !IsValid(ply:GetVehicle()) then return end
-    if !ply:InVehicle() then return end
+    -- if !IsValid(ply:GetVehicle()) then return end -- broken for some stupid reason
+    -- if !ply:InVehicle() then return end -- broken for some stupid reason
     if !enabled then return end
 
     print("play song net received")
@@ -151,6 +163,8 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     end
 
     if stopsong == true then return end
+
+    print("PlaySong Net passed checks!")
 
     local stationname = net.ReadString()
     local url = net.ReadString()
@@ -166,7 +180,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     print("TimeStamp: " .. timestamp)
 
     local realtimestamp = math.Round(timestamp, 2) + 0.35
-    local musicvolume = GetConVar("chicagoRP_vehicleradio_volume"):GetFloat()
+    local musicvolume = GetConVar("cl_chicagoRP_vehicleradio_volume"):GetFloat()
 
     if timestamp <= 0 then -- silly, might be made useless because of timer.Simple delay
         realtimestamp = 0
@@ -174,7 +188,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 
     print(realtimestamp)
 
-    local g_station = nil
+    -- local g_station = nil
     sound.PlayURL(url, "noblock", function(station) -- add fade in/out
         if (IsValid(station)) then
             station:Play()
@@ -190,12 +204,33 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
                 end
             end)
             print("song playing")
-            g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
+            -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
         else
             LocalPlayer():ChatPrint("Invalid URL!")
         end
     end)
 end)
+
+local function StopSong()
+    local ply = LocalPlayer()
+    if !IsValid(ply) then return end
+    if !enabled then return end
+
+    net.Start("chicagoRP_vehicleradio_receiveindex")
+    net.WriteBool(false)
+    net.SendToServer()
+
+    if IsValid(SONG) then
+        SONG:Stop()
+    end
+
+    currentStation = nil
+    stationname = nil
+    artistname = nil
+    songname = nil
+
+    print("song stopped and index emptied")
+end
 
 local function MusicFloat(value, min, max, default)
     local value = tonumber(value)
@@ -230,40 +265,12 @@ local function SendStation(name) -- maybe create actual stopsong function
     if !ply:InVehicle() then return end
     if !enabled then return end
 
-    local vehicle = ply:GetVehicle()
-    local passengertable = GetPassengerTable(vehicle)
-
-    PrintTable(passengertable)
-
-    -- instead of sending table to server, just do a table loop to send multiple net msgs, one for each player
-
     net.Start("chicagoRP_vehicleradio_receiveindex")
     net.WriteBool(true)
     net.WriteString(name)
     net.SendToServer()
 
     print("station name sent!")
-end
-
-local function StopSong()
-    local ply = LocalPlayer()
-    if !IsValid(ply) then return end
-    if !enabled then return end
-
-    net.Start("chicagoRP_vehicleradio_receiveindex")
-    net.WriteBool(false)
-    net.SendToServer()
-
-    if IsValid(SONG) then
-        SONG:Stop()
-    end
-
-    currentStation = nil
-    stationname = nil
-    artistname = nil
-    songname = nil
-
-    print("song stopped and index emptied")
 end
 
 surface.CreateFont("VehiclesRadioVGUIFont", {
@@ -279,12 +286,14 @@ local function ElementsDestroy()
     ELEMENTS = {}
 end
 
-local function ElementsAdd(x, y, radius, alpha)
+local function ElementsAdd(x, y, radius, alpha, bool)
+    print(bool)
     table.insert(ELEMENTS, {
         x = x,
         y = y,
         radius = radius,
-        alpha = alpha
+        alpha = alpha,
+        disable = bool
     })
 end
 
@@ -333,8 +342,17 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
-    if (!IsDriver(ply:GetVehicle())) then return end
+    print(IsDriver(ply:GetVehicle(), ply))
+    print("nigward")
+    if (!IsDriver(ply:GetVehicle(), ply)) then return end -- errored
     if !enabled then return end
+
+    local closebool = net.ReadBool()
+
+    print(closebool)
+    print("NGMASD")
+
+    if closebool == false then return end
 
     local screenwidth = ScrW()
     local screenheight = ScrH()
@@ -373,8 +391,12 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
             local rad = math.rad(d + arcdegrees * 0.50)
             local x = cx + math.cos(rad) * radius
             local y = cy - math.sin(rad) * radius
-            ElementsAdd(x, y, IconSize, 100)
             d = d - arcdegrees
+            if i == (count - 1) then
+                ElementsAdd(x, y, IconSize, 100, true)
+            else
+                ElementsAdd(x, y, IconSize, 100, false)
+            end
         end
     else
         notification.AddLegacy("You have not installed radio stations", 0, 3)
@@ -424,227 +446,242 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     local artistcachedname = nil
 
     for k, v in ipairs(ELEMENTS) do
-        local x = v.x
-        local y = v.y
+        print(v.disable)
+        if v.disable == false then
+            local x = v.x
+            local y = v.y
 
-        x = cx - (cx - v.x)
-        y = cy - (cy - v.y)
+            print(k)
 
-        -- print(chicagoRP.radioplaylists[k])
+            x = cx - (cx - v.x)
+            y = cy - (cy - v.y)
 
-        local radius = v.radius
-        local stationcachedname = chicagoRP.radioplaylists[k].printname
-        print(cx - (cx - v.x))
-        print(cy - (cy - v.y))
+            -- print(chicagoRP.radioplaylists[k])
 
-        local stationButton = motherFrame:Add("DButton")
-        stationButton:SetText("")
-        stationButton:SetSize(radius * 2.2, radius * 2.2)
-        stationButton:SetPos(x - (radius * 2.2) / 2, y - (radius * 2.2) / 2)
+            local radius = v.radius
+            local stationcachedname = chicagoRP.radioplaylists[k].printname
+            print(cx - (cx - v.x))
+            print(cy - (cy - v.y))
 
-        -- first one
-        -- radius: from 48 to 52
-        -- cursorX: from 0 to 760
-        -- cursorY: from 0 to 230
-        -- X: 810
-        -- Y: 280
+            local stationButton = motherFrame:Add("DButton")
+            stationButton:SetText("")
+            stationButton:SetSize(radius * 2.2, radius * 2.2)
+            stationButton:SetPos(x - (radius * 2.2) / 2, y - (radius * 2.2) / 2)
 
-        -- second one
-        -- radius: from 48 to 52
-        -- cursorX: from 0 to 1065
-        -- cursorY: from 0 to 235
-        -- X: 1110
-        -- Y: 280
+            -- first one
+            -- radius: from 48 to 52
+            -- cursorX: from 0 to 760
+            -- cursorY: from 0 to 230
+            -- X: 810
+            -- Y: 280
 
-        -- third one
-        -- radius: from 48 to 52
-        -- cursorX: from 0 to 1212
-        -- cursorY: from 0 to 492
-        -- X: 1260
-        -- Y: 540
+            -- second one
+            -- radius: from 48 to 52
+            -- cursorX: from 0 to 1065
+            -- cursorY: from 0 to 235
+            -- X: 1110
+            -- Y: 280
 
-        -- make hovering similar to gta radio UI
-        -- if 1216 > 1260 - (48 / 2) and 1216 < 1260 + (48 / 2) and 493 > 540 - (48 / 2) and 493 < 540 + (48 / 2) then
-        -- if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then
-        function stationButton:Paint(w, h) -- 230, 45, 40 and 245, 135, 70
-            local hovered = self:IsHovered()
-            local buf, step = self.__hoverBuf or 0, RealFrameTime() * 1
-            local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
-            DisableClipping(true)
+            -- third one
+            -- radius: from 48 to 52
+            -- cursorX: from 0 to 1212
+            -- cursorY: from 0 to 492
+            -- X: 1260
+            -- Y: 540
 
-            if hovered then
-                v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
+            -- make hovering similar to gta radio UI
+            -- if 1216 > 1260 - (48 / 2) and 1216 < 1260 + (48 / 2) and 493 > 540 - (48 / 2) and 493 < 540 + (48 / 2) then
+            -- if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then
+            function stationButton:Paint(w, h) -- 230, 45, 40 and 245, 135, 70
+                local hovered = self:IsHovered()
+                local buf, step = self.__hoverBuf or 0, RealFrameTime() * 1
+                local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
+                DisableClipping(true)
 
-                stationname = stationcachedname
-                artistname = artistcachedname
-                songname = songcachedname
+                if hovered then
+                    v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
-                -- print("X: " .. x)
-                -- print("Y: " .. y)
-                -- print("Radius: " .. radius)
-            else
-                v.radius = IconSize
-            end
+                    stationname = stationcachedname
+                    artistname = artistcachedname
+                    songname = songcachedname
 
-            -- print("CursorX: " .. cursorx)
-            -- print("CursorY: " .. cursory)
-
-            if hovered and buf < 1 then
-                buf = math.min(1, step + buf)
-            elseif !hovered and buf > 0 then
-                buf = math.max(0, buf - step)
-            end
-
-            self.__hoverBuf = buf
-            buf = math.EaseInOut(buf, 0.2, 0.2)
-            local alpha, clr = Lerp(buf, 150, 100), Lerp(buf, 20, 40)
-
-            graynormal.r = clr
-            graynormal.g = clr
-            graynormal.b = clr
-            graynormal.a = alpha
-
-            drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
-
-            if hovered and Outlinebuf < 1 then
-                Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
-            elseif !hovered and Outlinebuf > 0 then
-                Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
-            end
-
-            self.__hoverOutlineBuf = Outlinebuf
-            Outlinebuf = math.EaseInOut(Outlinebuf, 0.5, 0.5)
-            local alphaOutline = Lerp(Outlinebuf, 0, 170)
-
-            gradientLeftColor.a = alphaOutline
-            gradientRightColor.a = alphaOutline
-
-            drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 50, gradientLeftColor, gradientLeftMat)
-            drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 50, gradientRightColor, gradientRightMat)
-
-            -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10)) -- debug square
-            -- if !hovered then
-            --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
-            -- elseif hovered then
-            --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, grayhovered, k)
-            -- end
-
-            return nil
-        end
-
-        function stationButton:OnCursorEntered()
-            surface.PlaySound("chicagorp_settings/hover.wav")
-
-            if istable(chicagoRP.radioplaylists[k]) then
-                net.Start("chicagoRP_vehicleradio_sendinfo")
-                net.WriteString(chicagoRP.radioplaylists[k].name)
-                net.SendToServer()
-                print("sendinfo Net Sent!")
-            end
-
-            if currentStation == chicagoRP.radioplaylists[k].name then return end
-
-            timer.Simple(1.0, function()
-                print(IsValid(self))
-                print(self:IsHovered())
-                print(istable(chicagoRP.radioplaylists[k]))
-                print(chicagoRP.radioplaylists[k].name)
-                if IsValid(self) and self:IsHovered() and istable(chicagoRP.radioplaylists[k]) then
-                    SendStation(chicagoRP.radioplaylists[k].name)
-                    currentStation = chicagoRP.radioplaylists[k].name
-                    currentStationPrintName = chicagoRP.radioplaylists[k].printname
+                    -- print("X: " .. x)
+                    -- print("Y: " .. y)
+                    -- print("Radius: " .. radius)
+                else
+                    v.radius = IconSize
                 end
-            end)
-        end
 
-        net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
-            local artist = net.ReadString()
-            local song = net.ReadString()
+                -- print("CursorX: " .. cursorx)
+                -- print("CursorY: " .. cursory)
 
-            artistcachedname = artist
-            songcachedname = song
-        end)
-    end
+                if hovered and buf < 1 then
+                    buf = math.min(1, step + buf)
+                elseif !hovered and buf > 0 then
+                    buf = math.max(0, buf - step)
+                end
 
-    local arcdegreesCalc = 360 / #stations + 1
-    local radiusCalc = 300
-    local dCalc = 360
+                self.__hoverBuf = buf
+                buf = math.EaseInOut(buf, 0.2, 0.2)
+                local alpha, clr = Lerp(buf, 150, 100), Lerp(buf, 20, 40)
 
-    local radCalc = math.rad(dCalc + arcdegreesCalc * 0.50)
-    local xCalc = cx + math.cos(radCalc) * radiusCalc
-    local yCalc = cy - math.sin(radCalc) * radiusCalc
-    dCalc = dCalc - arcdegreesCalc
+                graynormal.r = clr
+                graynormal.g = clr
+                graynormal.b = clr
+                graynormal.a = alpha
 
-    local radioOffButton = motherFrame:Add("DButton")
-    radioOffButton:SetText("")
-    radioOffButton:SetSize(IconSize * 2.2, IconSize * 2.2)
-    radioOffButton:SetPos(xCalc - (IconSize * 2.2) / 2, yCalc - (IconSize * 2.2) / 2)
+                drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
 
-    function radioOffButton:Paint(w, h)
-        local hovered = self:IsHovered()
-        local radius = IconSize
-        local buf, step = self.__hoverBuf or 0, RealFrameTime() * 1
-        local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
-        DisableClipping(true)
+                if hovered and Outlinebuf < 1 then
+                    Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
+                elseif !hovered and Outlinebuf > 0 then
+                    Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
+                end
 
-        if hovered then
-            radius = Lerp(math.min(RealFrameTime() * 5, 1), radius, IconSize * 1.1)
+                self.__hoverOutlineBuf = Outlinebuf
+                Outlinebuf = math.EaseInOut(Outlinebuf, 0.5, 0.5)
+                local alphaOutline = Lerp(Outlinebuf, 0, 170)
 
-            stationname = "Radio Off"
-            artistname = nil
-            songname = nil
-        else
-            radius = IconSize
-        end
+                gradientLeftColor.a = alphaOutline
+                gradientRightColor.a = alphaOutline
 
-        if hovered and buf < 1 then
-            buf = math.min(1, step + buf)
-        elseif !hovered and buf > 0 then
-            buf = math.max(0, buf - step)
-        end
+                drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 4, gradientLeftColor, gradientLeftMat)
+                drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 4, gradientRightColor, gradientRightMat)
 
-        self.__hoverBuf = buf
-        buf = math.EaseInOut(buf, 0.2, 0.2)
-        local alpha, clr = Lerp(buf, 150, 100), Lerp(buf, 20, 40)
+                -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10)) -- debug square
+                -- if !hovered then
+                --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
+                -- elseif hovered then
+                --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, grayhovered, k)
+                -- end
 
-        graynormal.r = clr
-        graynormal.g = clr
-        graynormal.b = clr
-        graynormal.a = alpha
-
-        drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
-
-        if hovered and Outlinebuf < 1 then
-            Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
-        elseif !hovered and Outlinebuf > 0 then
-            Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
-        end
-
-        self.__hoverOutlineBuf = Outlinebuf
-        Outlinebuf = math.EaseInOut(Outlinebuf, 0.5, 0.5)
-        local alphaOutline = Lerp(Outlinebuf, 0, 170)
-
-        gradientLeftColor.a = alphaOutline
-        gradientRightColor.a = alphaOutline
-
-        drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 50, gradientLeftColor, gradientLeftMat)
-        drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 50, gradientRightColor, gradientRightMat)
-    end
-
-    function radioOffButton:OnCursorEntered()
-        surface.PlaySound("chicagorp_settings/hover.wav")
-
-        stationname = "Radio Off"
-        artistname = nil
-        songname = nil
-
-        if currentStation == chicagoRP.radioplaylists[k].name then return end
-
-        timer.Simple(1.0, function()
-            if IsValid(self) and self:IsHovered()then
-                StopSong()
+                return nil
             end
-        end)
+
+            function stationButton:OnCursorEntered()
+                surface.PlaySound("chicagorp_settings/hover.wav")
+
+                if istable(chicagoRP.radioplaylists[k]) then
+                    net.Start("chicagoRP_vehicleradio_sendinfo")
+                    net.WriteString(chicagoRP.radioplaylists[k].name)
+                    net.SendToServer()
+                    print("sendinfo Net Sent!")
+                end
+
+                if currentStation == chicagoRP.radioplaylists[k].name then return end
+
+                timer.Simple(1.0, function()
+                    print(IsValid(self))
+                    print(self:IsHovered())
+                    print(istable(chicagoRP.radioplaylists[k]))
+                    print(chicagoRP.radioplaylists[k].name)
+                    if IsValid(self) and self:IsHovered() and istable(chicagoRP.radioplaylists[k]) then
+                        SendStation(chicagoRP.radioplaylists[k].name)
+                        currentStation = chicagoRP.radioplaylists[k].name
+                        currentStationPrintName = chicagoRP.radioplaylists[k].printname
+                    end
+                end)
+            end
+
+            net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
+                local artist = net.ReadString()
+                local song = net.ReadString()
+
+                artistcachedname = artist
+                songcachedname = song
+            end)
+        elseif v.disable == true then
+            print("RADIO OFF BUTTON")
+
+            local x = v.x
+            local y = v.y
+            local radius = v.radius
+
+            print(k)
+
+            x = cx - (cx - v.x)
+            y = cy - (cy - v.y)
+
+            -- print(chicagoRP.radioplaylists[k])
+
+            local radioOffButton = motherFrame:Add("DButton")
+            radioOffButton:SetText("")
+            radioOffButton:SetSize(radius * 2.2, radius * 2.2)
+            radioOffButton:SetPos(x - (radius * 2.2) / 2, y - (radius * 2.2) / 2)
+
+            function radioOffButton:Paint(w, h)
+                local hovered = self:IsHovered()
+                local buf, step = self.__hoverBuf or 0, RealFrameTime() * 1
+                local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
+                DisableClipping(true)
+
+                if hovered then
+                    radius = Lerp(math.min(RealFrameTime() * 5, 1), radius, IconSize * 1.1)
+
+                    stationname = "Radio Off"
+                    artistname = nil
+                    songname = nil
+                else
+                    radius = IconSize
+                end
+
+                if hovered and buf < 1 then
+                    buf = math.min(1, step + buf)
+                elseif !hovered and buf > 0 then
+                    buf = math.max(0, buf - step)
+                end
+
+                self.__hoverBuf = buf
+                buf = math.EaseInOut(buf, 0.2, 0.2)
+                local alpha, clr = Lerp(buf, 150, 100), Lerp(buf, 20, 40)
+
+                graynormal.r = clr
+                graynormal.g = clr
+                graynormal.b = clr
+                graynormal.a = alpha
+
+                local filled = circles.New(CIRCLE_FILLED, radius * 1.2, w / 2, h / 2)
+                filled:SetDistance(1)
+                filled:SetMaterial(true)
+                filled:SetColor(graynormal)
+
+                filled()
+
+                surface.SetDrawColor(255, 255, 255, 255)
+                surface.SetMaterial(radioOffMat)
+                surface.DrawTexturedRectRotated(w / 2, h / 2, IconSize * 2, IconSize * 2, 0)
+
+                if hovered and Outlinebuf < 1 then
+                    Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
+                elseif !hovered and Outlinebuf > 0 then
+                    Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
+                end
+
+                self.__hoverOutlineBuf = Outlinebuf
+                Outlinebuf = math.EaseInOut(Outlinebuf, 0.5, 0.5)
+                local alphaOutline = Lerp(Outlinebuf, 0, 170)
+
+                gradientLeftColor.a = alphaOutline
+                gradientRightColor.a = alphaOutline
+
+                drawOutlineCircle(w / 2, h / 2, radius * 1.2, 4, gradientLeftColor, gradientLeftMat)
+                drawOutlineCircle(w / 2, h / 2, radius * 1.2, 4, gradientRightColor, gradientRightMat)
+            end
+
+            function radioOffButton:OnCursorEntered()
+                surface.PlaySound("chicagorp_settings/hover.wav")
+
+                stationname = "Radio Off"
+                artistname = nil
+                songname = nil
+
+                timer.Simple(1.0, function()
+                    if IsValid(self) and self:IsHovered()then
+                        StopSong()
+                    end
+                end)
+            end
+        end
     end
 
     local gameSettingsScrollPanel = vgui.Create("DScrollPanel", motherFrame)
@@ -693,18 +730,33 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
         end
     end
 
+    local debugPrintSongButton = gameSettingsScrollPanel:Add("DButton")
+    debugPrintSongButton:SetText("SONG PRINT")
+    debugPrintSongButton:Dock(TOP)
+    debugPrintSongButton:DockMargin(0, 10, 0, 0)
+    debugPrintSongButton:SetSize(200, 50)
+
+    function debugPrintSongButton:DoClick()
+        print(SONG)
+        if istable(SONG) then
+            PrintTable(SONG)
+        end
+    end
     OpenMotherFrame = motherFrame
 end)
 
 print("chicagoRP GUI loaded!")
 
 -- bugs:
+-- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
 -- out of range timestamp (idk, debug with print)
--- previous stations song continuing to play when switching (idk, debug with print)
+-- radio off button appears at bad position
+-- previous stations song continuing to play when switching (fucking annoying as shit, fix this)
 
 -- to-do:
+-- make radio open button hold open
+-- add lerp to make radius fade out look nicer
 -- add random chance of album being inserted
 -- add DJ/commerical support
 -- fix HUDPaint not returning false (caused by circles library?)
 -- make layout pos and size match GTA 5's
--- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
