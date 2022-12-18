@@ -5,9 +5,6 @@ util.AddNetworkString("chicagoRP_vehicleradio_receiveindex")
 util.AddNetworkString("chicagoRP_vehicleradio_playsong")
 util.AddNetworkString("chicagoRP_vehicleradio_stopsong")
 
-local firstindex = firstindex or nil -- might cause issues with multiple players
-local secondindex = secondindex or nil -- might cause issues with multiple players
-
 local StartPosition = StartPosition or {}
 local NextSongTime = NextSongTime or {}
 local timestamp = timestamp or {}
@@ -15,7 +12,8 @@ local timestamp = timestamp or {}
 local music_list = music_list or {}
 local music_left = music_left or {}
 
-local activeradio = activeradio or false -- might cause issues with multiple players
+local vehicle_list = vehicle_list or {}
+
 local debugmode = true
 
 local scriptenabled = GetConVar("sv_chicagoRP_vehicleradio_enable"):GetBool()
@@ -80,8 +78,6 @@ local function GetPassengerTable(vehicle, ply)
 end
 
 for _, v in ipairs(chicagoRP.radioplaylists) do
-    -- if !IsValid(chicagoRP[v.name]) then goto skip end -- replace with continue/return before release
-
     if !IsValid(music_list[v.name]) or table.IsEmpty(music_list[v.name]) then
         music_list[v.name] = music_list[v.name] or {}
 
@@ -108,31 +104,19 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 
             break
         end
-        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
-        -- PrintTable(music_left)
     end
 end
 
 local function PlaySong(ply)
     print("PlaySong ran!")
 
-    if secondindex == nil then return end
+    local vehicle = ply:GetVehicle()
+    local actualvehicle = GetRealVehicle(vehicle, ply)
+    local secondindex = actualvehicle:GetNW2String("currentstation")
 
-    if !scriptenabled then return end
+    if secondindex == nil or !scriptenabled then return end
 
     if ply == nil then ply = Entity(1) end
-
-    -- for _, v1 in ipairs(music_left[secondindex]) do
-    --     -- for _, v in ipairs(music_left[v1.name]) do
-    --     --     timestamp[v1.name] = math.abs(StartPosition[v1.name] - SysTime())
-    --     --     -- PrintTable(timestamp)
-    --     --     -- print(StartPosition[v1.name])
-    --     --     -- print(SysTime())
-    --     -- end
-    --     timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
-    --     PrintTable(timestamp)
-    --     print(StartPosition[v1.name])
-    -- end
 
     if StartPosition[secondindex] - SysTime() == 0 then
         print(StartPosition[secondindex])
@@ -151,8 +135,6 @@ local function PlaySong(ply)
     PrintTable(music_left[secondindex])
 
     for _, v2 in ipairs(music_left[secondindex]) do
-        -- if !IsValid(music_left[secondindex]) then print("music_left list invalid!") goto skip end
-
         net.Start("chicagoRP_vehicleradio_playsong")
         net.WriteBool(false)
         net.WriteString(secondindex)
@@ -164,8 +146,6 @@ local function PlaySong(ply)
         net.Send(ply) -- get players somehow
 
         print("PlaySong Net sent!")
-
-        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
 
         break
     end
@@ -186,25 +166,26 @@ local function table_calculation()
     if !scriptenabled then return end
 
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        -- if !IsValid(chicagoRP[v.name]) then goto skip end
-
         if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
             table.remove(music_left[v.name], 1)
 
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("Future StartPosition and NextSongTime set!")
 
-                if activeradio == false or firstindex == nil then break end
+                for _, v3 in ipairs (player.GetAll()) do
+                    local vehicle = v3:GetVehicle()
+                    local actualvehicle = GetRealVehicle(vehicle, v3)
+                    local secondindex = actualvehicle:GetNW2String("currentstation")
 
-                if activeradio == true and v.name == firstindex then
-                    print("Song played after previous ended")
+                    if v3:GetNW2Bool("activeradio") == false or secondindex == nil then break end
 
-                    PlaySong()
+                    if v3:GetNW2Bool("activeradio") == true and v.name == secondindex then
+                        print("Song played after previous ended")
 
-                    break
+                        PlaySong(v3)
+                    end
                 end
 
                 break
@@ -222,23 +203,25 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                -- timestamp[v.name] = math.abs(StartPosition[v.name] - SysTime())
                 print("Regenerated StartPosition and NextSongTime set!")
 
-                if activeradio == false or firstindex == nil then break end
+                for _, v3 in ipairs (player.GetAll()) do
+                    local vehicle = v3:GetVehicle()
+                    local actualvehicle = GetRealVehicle(vehicle, v3)
+                    local secondindex = actualvehicle:GetNW2String("currentstation")
 
-                if activeradio == true and v.name == firstindex then
-                    print("Song played after table regen")
+                    if v3:GetNW2Bool("activeradio") == false or secondindex == nil then break end
 
-                    PlaySong()
+                    if v3:GetNW2Bool("activeradio") == true and v.name == secondindex then
+                        print("Song played after previous ended")
 
-                    break
+                        PlaySong(v3)
+                    end
                 end
 
                 break
             end
         end
-        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
     end
 end
 
@@ -257,32 +240,27 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     local enabled = net.ReadBool()
 
     if enabled == false then
-        activeradio = false
-        firstindex = nil
-        secondindex = nil
+        ply:SetNW2Bool("activeradio", false)
+        actualvehicle:SetNW2String("currentstation", nil)
+        table.remove(vehicle_list, actualvehicle)
     end
 
     if enabled == false then return end -- fucking syntax
 
     if enabled == true then
-        activeradio = true
+        ply:SetNW2Bool("activeradio", true)
     end
 
     local stationname = net.ReadString()
 
-    firstindex = stationname
-    secondindex = stationname
-
     actualvehicle:SetNW2String("currentstation", stationname)
+    table.insert(vehicle_list, actualvehicle)
 
-    for k, v in ipairs(passengertable) do
-        PrintTable(passengertable)
-        print(v)
+    for _, v in ipairs(passengertable) do
+        -- PrintTable(passengertable)
+        -- print(v)
         PlaySong(v)
     end
-
-    -- PrintTable(firstindex)
-    -- PrintTable(secondindex)
 
     print("station name received!")
 end)
@@ -293,8 +271,6 @@ net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
     local station = net.ReadString()
 
     for _, v2 in ipairs(music_left[station]) do
-        -- if !IsValid(music_left[station]) then print("music_left list invalid!") goto skip end
-
         net.Start("chicagoRP_vehicleradio_receiveinfo")
         net.WriteString(v2.artist)
         net.WriteString(v2.song)
@@ -302,15 +278,11 @@ net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
 
         print("fetchinfo Net sent!")
 
-        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
-
         break
     end
 end)
 
 local function MusicHandler()
-    -- print("SysTime: " .. SysTime())
-    -- print("musichandler working")
     table_calculation()
 end
 
@@ -329,23 +301,16 @@ hook.Add("PlayerEnteredVehicle", "chicagoRP_vehicleradio_leftvehicle", function(
         for _, v in RandomPairs(chicagoRP.radioplaylists) do
             stationname = v.name
 
-            -- print("AEUFKHBJJHEGBFHSJFJBHSDF")
-
-            -- print(stationname)
-            -- print("PlayerEnteredVehicle RandomPairs^^^")
-
             break
         end
     end
 
     if stationname == nil then return end
 
-    firstindex = stationname
-    secondindex = stationname
+    actualvehicle:SetNW2String("currentstation", stationname)
+    table.insert(vehicle_list, veh)
 
-    print("SecondIndex " .. secondindex)
-
-    activeradio = true
+    ply:SetNW2Bool("activeradio", true)
 
     PlaySong(ply)
 end)
@@ -357,8 +322,12 @@ hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leftvehicle", function(pl
     net.WriteBool(false)
     net.Send(ply)
 
-    if activeradio == true then
-        activeradio = false
+    if ply:GetNW2Bool("activeradio") == true then
+        ply:SetNW2Bool("activeradio", false)
+
+        actualvehicle:SetNW2String("currentstation", nil)
+        table.remove(vehicle_list, veh)
+
         net.Start("chicagoRP_vehicleradio_stopsong")
         net.Send(ply)
     end
@@ -397,14 +366,11 @@ concommand.Add("print_timers", function(ply)
     print("timers printed")
     print("SysTime: " .. SysTime())
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        -- if !IsValid(chicagoRP[v.name]) then goto skip end
-
         print(NextSongTime[v.name] <= SysTime())
         print(StartPosition[v.name])
         print("StartPosition^^^^^")
         print(NextSongTime[v.name])
         print("NextSongTime^^^^^")
-        -- ::skip:: -- dunno if proper usage but higher likelyhood that it works properly compared to simply doing return end
     end
 end)
 

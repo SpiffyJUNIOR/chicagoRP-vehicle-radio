@@ -2,7 +2,7 @@ local HideHUD = false
 local OpenMotherFrame = nil
 local currentStation = nil
 local currentStationPrintName = nil
-local SONG = SONG or nil
+SONG = SONG or nil
 local stationname = nil
 local artistname = nil
 local songname = nil
@@ -21,9 +21,14 @@ local gradientRightColor = Color(245, 135, 70, 170)
 local blurMat = Material("pp/blurscreen")
 local gradientLeftMat = Material("vgui/gradient-l") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
 local gradientRightMat = Material("vgui/gradient-r") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
+local radioIcon = nil
 local radioOffMat = Material("chicagorp_vehicleradio/radiooff.png", "smooth")
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
+
+for _, v in ipairs (chicagoRP.radioplaylists) do
+    radioIcon[v.name] = Material(v.icon)
+end
 
 local function BlurBackground(panel)
     if (!IsValid(panel) or !panel:IsVisible()) then return end
@@ -157,7 +162,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 
     local stopsong = net.ReadBool()
 
-    if IsValid(SONG) then
+    if SONG then
         SONG:Stop()
         print("bitchslapped that weak song, say goodbye to your aux cord privileges")
     end
@@ -220,7 +225,7 @@ local function StopSong()
     net.WriteBool(false)
     net.SendToServer()
 
-    if IsValid(SONG) then
+    if SONG then
         SONG:Stop()
     end
 
@@ -246,7 +251,7 @@ cvars.AddChangeCallback("chicagoRP_vehicleradio_volume", function(convar_name, v
     local new_volume = tonumber(value_new1)
 
     timer.Simple(0, function()
-        if IsValid(SONG) then
+        if SONG then
             SONG:SetVolume(new_volume)
         end
     end)
@@ -313,9 +318,8 @@ local function drawStationCircle(x, y, radius, color, k) -- nice af function, sa
 
     filled()
 
-    local mat = Material(chicagoRP.radioplaylists[k].icon) -- cache these you fucking retard
     surface.SetDrawColor(255, 255, 255, 255)
-    surface.SetMaterial(mat)
+    surface.SetMaterial(radioIcon[k])
     surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
 end
 
@@ -382,7 +386,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     local count = #stations
 
     if count > 0 then
-        local arcdegrees = 360 / count
+        local arcdegrees = 360 / count -- fix radio pos with this
         local radius = 300
         local d = 360
         ElementsDestroy()
@@ -425,9 +429,6 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
     function motherFrame:Paint(w, h)
         BlurBackground(self)
-        if IsValid(SONG) then
-            SONG:GetTime()
-        end
         -- print(stationname)
         -- print(IsValid(stationname))
         -- print(isstring(stationname))
@@ -509,7 +510,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
                     -- print("Y: " .. y)
                     -- print("Radius: " .. radius)
                 else
-                    v.radius = IconSize
+                    v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.0)
                 end
 
                 -- print("CursorX: " .. cursorx)
@@ -622,7 +623,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
                     artistname = nil
                     songname = nil
                 else
-                    radius = IconSize
+                    radius = Lerp(math.min(RealFrameTime() * 5, 1), radius, IconSize * 1.0)
                 end
 
                 if hovered and buf < 1 then
@@ -709,25 +710,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     debugStopSongButton:SetSize(200, 50)
 
     function debugStopSongButton:DoClick()
-        if IsValid(SONG) then
-            SONG:Stop()
-            print("bitchslapped that wack ass song")
-        end
         StopSong()
-    end
-
-    local debugVOLSongButton = gameSettingsScrollPanel:Add("DButton")
-    debugVOLSongButton:SetText("SONG VOLUME")
-    debugVOLSongButton:Dock(TOP)
-    debugVOLSongButton:DockMargin(0, 10, 0, 0)
-    debugVOLSongButton:SetSize(200, 50)
-
-    function debugVOLSongButton:DoClick()
-        if IsValid(SONG) then
-            SONG:GetVolume()
-            SONG:SetVolume(math.random(0.1, 0.9))
-            print("got vol")
-        end
     end
 
     local debugPrintSongButton = gameSettingsScrollPanel:Add("DButton")
@@ -749,13 +732,14 @@ print("chicagoRP GUI loaded!")
 
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
--- out of range timestamp (idk, debug with print)
--- radio off button appears at bad position
 -- previous stations song continuing to play when switching (fucking annoying as shit, fix this)
+-- out of range timestamp (idk, debug with print)
+-- radio off button appears at end of wheel rather than bottom of the screen
 
 -- to-do:
+-- 
 -- make radio open button hold open
--- add lerp to make radius fade out look nicer
+-- add radio wheel hover like GTA 5
 -- add random chance of album being inserted
 -- add DJ/commerical support
 -- fix HUDPaint not returning false (caused by circles library?)
