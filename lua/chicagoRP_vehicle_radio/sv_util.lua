@@ -174,6 +174,9 @@ local function table_calculation()
 
                 for _, v3 in ipairs (player.GetAll()) do
                     local vehicle = v3:GetVehicle()
+
+                    if !IsValid(vehicle) then break end
+
                     local actualvehicle = GetRealVehicle(vehicle, v3)
                     local secondindex = actualvehicle:GetNW2String("currentstation")
 
@@ -205,6 +208,9 @@ local function table_calculation()
 
                 for _, v3 in ipairs (player.GetAll()) do
                     local vehicle = v3:GetVehicle()
+
+                    if !IsValid(vehicle) then break end
+
                     local actualvehicle = GetRealVehicle(vehicle, v3)
                     local secondindex = actualvehicle:GetNW2String("currentstation")
 
@@ -239,7 +245,10 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
 
     if enabled == false then
         ply:SetNW2Bool("activeradio", false)
-        actualvehicle:SetNW2String("currentstation", nil)
+        if IsValid(actualvehicle) then
+            actualvehicle:SetNW2String("currentstation", nil)
+            print("receiveindex actualvehicle worked")
+        end
     end
 
     if enabled == false then return end -- fucking syntax
@@ -288,9 +297,6 @@ hook.Add("PlayerEnteredVehicle", "chicagoRP_vehicleradio_leftvehicle", function(
     local actualvehicle = GetRealVehicle(veh, ply)
     local stationname = actualvehicle:GetNW2String("currentstation")
 
-    print(stationname)
-    print("PlayerEnteredVehicle Cached^^^")
-
     if !scriptenabled then return end
 
     if !IsValid(stationname) and randomstation then
@@ -318,9 +324,10 @@ hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leftvehicle", function(pl
     net.Send(ply)
 
     if ply:GetNW2Bool("activeradio") == true then
-        ply:SetNW2Bool("activeradio", false)
+        -- local actualvehicle = GetRealVehicle(veh, ply)
 
-        actualvehicle:SetNW2String("currentstation", nil)
+        ply:SetNW2Bool("activeradio", false)
+        -- actualvehicle:SetNW2String("currentstation", nil)
 
         net.Start("chicagoRP_vehicleradio_stopsong")
         net.Send(ply)

@@ -20,13 +20,16 @@ local gradientRightColor = Color(245, 135, 70, 170)
 local blurMat = Material("pp/blurscreen")
 local gradientLeftMat = Material("vgui/gradient-l") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
 local gradientRightMat = Material("vgui/gradient-r") -- gradient-d, gradient-r, gradient-u, gradient-l, gradient_down, gradient_up
-local radioIcon = nil
-local radioOffMat = Material("chicagorp_vehicleradio/radiooff.png", "smooth")
+local radioIcon = radioIcon or {}
+local radioOffMat = Material("chicagorp_vehicleradio/radiooff.png", "smooth mips")
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
 
-for _, v in ipairs (chicagoRP.radioplaylists) do
-    radioIcon[v.name] = Material(v.icon)
+if istable(chicagoRP.radioplaylists) then
+    for k, v in ipairs(chicagoRP.radioplaylists) do
+        radioIcon[k] = Material(v.icon, "smooth mips")
+        print("not cached being constantly done")
+    end
 end
 
 local function BlurBackground(panel)
@@ -238,7 +241,7 @@ local function MusicFloat(value, min, max, default)
     return isnumber(value) and math.Clamp(tonumber(value), min, max) or default
 end
 
-cvars.AddChangeCallback("chicagoRP_vehicleradio_volume", function(convar_name, value_old, value_new)
+cvars.AddChangeCallback("cl_chicagoRP_vehicleradio_volume", function(convar_name, value_old, value_new)
     local value = tonumber(value_new)
     local value_new = isnumber(value) and value or 1
     local value_new1 = MusicFloat(value_new, 0, 0.25, 0.05)
@@ -328,7 +331,7 @@ local function drawOutlineCircle(x, y, radius, thickness, color, material)
     outlined()
 end
 
-hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
+hook.Add("HUDShouldDraw", "chicagoRP_vehicleradio_HideHUD", function()
     if HideHUD == true then
         return false
     end
@@ -720,9 +723,10 @@ print("chicagoRP GUI loaded!")
 -- radio off button appears at end of wheel rather than bottom of the screen
 
 -- to-do:
+-- keep hover on station if currentstation == k or whatever
+-- send station and song info to client when entering car
 -- make radio open button hold open
 -- add radio wheel hover like GTA 5
 -- add random chance of album being inserted
 -- add DJ/commerical support
--- fix HUDPaint not returning false (caused by circles library?)
 -- make layout pos and size match GTA 5's
