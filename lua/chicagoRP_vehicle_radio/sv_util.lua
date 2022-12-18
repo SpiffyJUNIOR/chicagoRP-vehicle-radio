@@ -12,8 +12,6 @@ local timestamp = timestamp or {}
 local music_list = music_list or {}
 local music_left = music_left or {}
 
-local vehicle_list = vehicle_list or {}
-
 local debugmode = true
 
 local scriptenabled = GetConVar("sv_chicagoRP_vehicleradio_enable"):GetBool()
@@ -242,7 +240,6 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     if enabled == false then
         ply:SetNW2Bool("activeradio", false)
         actualvehicle:SetNW2String("currentstation", nil)
-        table.remove(vehicle_list, actualvehicle)
     end
 
     if enabled == false then return end -- fucking syntax
@@ -254,7 +251,6 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     local stationname = net.ReadString()
 
     actualvehicle:SetNW2String("currentstation", stationname)
-    table.insert(vehicle_list, actualvehicle)
 
     for _, v in ipairs(passengertable) do
         -- PrintTable(passengertable)
@@ -308,7 +304,6 @@ hook.Add("PlayerEnteredVehicle", "chicagoRP_vehicleradio_leftvehicle", function(
     if stationname == nil then return end
 
     actualvehicle:SetNW2String("currentstation", stationname)
-    table.insert(vehicle_list, veh)
 
     ply:SetNW2Bool("activeradio", true)
 
@@ -326,7 +321,6 @@ hook.Add("PlayerLeaveVehicle", "chicagoRP_vehicleradio_leftvehicle", function(pl
         ply:SetNW2Bool("activeradio", false)
 
         actualvehicle:SetNW2String("currentstation", nil)
-        table.remove(vehicle_list, veh)
 
         net.Start("chicagoRP_vehicleradio_stopsong")
         net.Send(ply)

@@ -13,7 +13,6 @@ local Dynamic = 0
 local enabled = GetConVar("cl_chicagoRP_vehicleradio_enable"):GetBool()
 local reddebug = Color(200, 10, 10, 150)
 local graynormal = Color(20, 20, 20, 150)
-local grayhovered = Color(40, 40, 40, 100)
 local whitecolor = Color(255, 255, 255, 255)
 local blackcolor = Color(0, 0, 0, 255)
 local gradientLeftColor = Color(230, 45, 40, 170)
@@ -57,7 +56,7 @@ local function GetRealVehicle(vehicle)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
            return ply:GetVehicle():GetParent()
         elseif SVMOD and SVMOD:IsVehicle(vehicle) then
@@ -98,7 +97,7 @@ local function GetPassengerTable(vehicle)
 
     local finaltable = nil
 
-    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
             return GetSimfphysPassengers(vehicle)
         end
@@ -118,11 +117,11 @@ local function IsDriver(vehicle, ply)
 
     local driver = false
 
-    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
             driver = ply:IsDrivingSimfphys()
             print(ply:IsDrivingSimfphys())
-            if driver == true then -- errored
+            if driver == true then
                 return driver
             elseif driver == nil or driver == false then
                 driver = false
@@ -187,10 +186,6 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     local realtimestamp = math.Round(timestamp, 2) + 0.35
     local musicvolume = GetConVar("cl_chicagoRP_vehicleradio_volume"):GetFloat()
 
-    if timestamp <= 0 then -- silly, might be made useless because of timer.Simple delay
-        realtimestamp = 0
-    end
-
     print(realtimestamp)
 
     -- local g_station = nil
@@ -204,7 +199,6 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
                 if IsValid(station) then
                     station:SetTime(realtimestamp, false) -- fucking desync wtf???
                     station:SetVolume(musicvolume)
-                    -- SONG:SetTime(realtimestamp, false) -- or this (don't work :skull:)
                     print(station:GetTime())
                 end
             end)
@@ -263,7 +257,7 @@ net.Receive("chicagoRP_vehicleradio_stopsong", function()
     print("stop song net received")
 end)
 
-local function SendStation(name) -- maybe create actual stopsong function
+local function SendStation(name)
     local ply = LocalPlayer()
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
@@ -310,7 +304,7 @@ local function UpdateElementsSize()
     end
 end
 
-local function drawStationCircle(x, y, radius, color, k) -- nice af function, saves lots of trouble
+local function drawStationCircle(x, y, radius, color, k)
     local filled = circles.New(CIRCLE_FILLED, radius, x, y)
     filled:SetDistance(1)
     filled:SetMaterial(true)
@@ -323,7 +317,7 @@ local function drawStationCircle(x, y, radius, color, k) -- nice af function, sa
     surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
 end
 
-local function drawOutlineCircle(x, y, radius, thickness, color, material) -- nice af function, saves lots of trouble
+local function drawOutlineCircle(x, y, radius, thickness, color, material)
     if material == nil then material = true end
 
     local outlined = circles.New(CIRCLE_OUTLINED, radius, x, y, thickness)
@@ -340,7 +334,7 @@ hook.Add("HUDPaint", "chicagoRP_vehicleradio_HideHUD", function()
     end
 end)
 
-net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return end
+net.Receive("chicagoRP_vehicleradio", function()
     local ply = LocalPlayer()
     if IsValid(OpenMotherFrame) then OpenMotherFrame:Close() return end
     if !IsValid(ply) then return end
@@ -348,13 +342,10 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     if !ply:InVehicle() then return end
     print(IsDriver(ply:GetVehicle(), ply))
     print("nigward")
-    if (!IsDriver(ply:GetVehicle(), ply)) then return end -- errored
+    if (!IsDriver(ply:GetVehicle(), ply)) then return end
     if !enabled then return end
 
     local closebool = net.ReadBool()
-
-    print(closebool)
-    print("NGMASD")
 
     if closebool == false then return end
 
@@ -363,7 +354,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     local cx = screenwidth / 2
     local cy = screenheight / 2
     local vehicle = ply:GetVehicle()
-    local motherFrame = vgui.Create("DFrame") -- switch to circles library, use code from freddy15's solution as an example
+    local motherFrame = vgui.Create("DFrame")
     motherFrame:SetSize(screenwidth, screenheight)
     motherFrame:SetVisible(true)
     motherFrame:SetDraggable(true)
@@ -379,7 +370,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
 
     motherFrame:MakePopup()
     motherFrame:SetKeyboardInputEnabled(false)
-    motherFrame:SetMouseInputEnabled(true) -- enable mouse input but not keyboard input
+    motherFrame:SetMouseInputEnabled(true)
     motherFrame:Center()
 
     local stations = table.GetKeys(chicagoRP.radioplaylists)
@@ -549,13 +540,6 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
                 drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 4, gradientLeftColor, gradientLeftMat)
                 drawOutlineCircle(w / 2, h / 2, v.radius * 1.2, 4, gradientRightColor, gradientRightMat)
 
-                -- draw.RoundedBox(8, 0, 0, w, h, Color(200, 0, 0, 10)) -- debug square
-                -- if !hovered then
-                --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
-                -- elseif hovered then
-                --     drawStationCircle(w / 2, h / 2, v.radius * 1.2, grayhovered, k)
-                -- end
-
                 return nil
             end
 
@@ -689,7 +673,7 @@ net.Receive("chicagoRP_vehicleradio", function() -- if not driver then return en
     gameSettingsScrollPanel:Dock(LEFT)
     gameSettingsScrollPanel:SetSize(200, 50)
 
-    for _, v in ipairs(chicagoRP.radioplaylists) do -- get driver + passengers, sendtoserver for each player, then send back to client
+    for _, v in ipairs(chicagoRP.radioplaylists) do
         local categoryButton = gameSettingsScrollPanel:Add("DButton")
         categoryButton:SetText(v.name)
         categoryButton:Dock(TOP)
@@ -733,11 +717,9 @@ print("chicagoRP GUI loaded!")
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
 -- previous stations song continuing to play when switching (fucking annoying as shit, fix this)
--- out of range timestamp (idk, debug with print)
 -- radio off button appears at end of wheel rather than bottom of the screen
 
 -- to-do:
--- 
 -- make radio open button hold open
 -- add radio wheel hover like GTA 5
 -- add random chance of album being inserted
