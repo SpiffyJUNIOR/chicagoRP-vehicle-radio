@@ -44,8 +44,8 @@ local function GetSimfphysPassengers(vehicle, ply)
     local children = parent:GetChildren()
     local count = #children
 
-    print(parent)
-    PrintTable(children)
+    -- print(parent)
+    -- PrintTable(children)
 
     for i = 1, count do
         local passenger = children[i]:GetDriver()
@@ -106,7 +106,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 end
 
 local function PlaySong(ply)
-    print("PlaySong ran!")
+    -- print("PlaySong ran!")
 
     local vehicle = ply:GetVehicle()
     local actualvehicle = GetRealVehicle(vehicle, ply)
@@ -116,21 +116,12 @@ local function PlaySong(ply)
 
     if ply == nil then ply = Entity(1) end
 
-    if StartPosition[secondindex] - SysTime() == 0 then
-        print(StartPosition[secondindex])
-        print("timestamp = 0")
-        timestamp[secondindex] = 0
-    else
-        print(StartPosition[secondindex])
-        print(SysTime())
-        print("timestamp > 0")
-        timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
-    end
+    timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
 
-    PrintTable(timestamp)
-    print(StartPosition[secondindex])
+    -- PrintTable(timestamp)
+    -- print(StartPosition[secondindex])
 
-    PrintTable(music_left[secondindex])
+    -- PrintTable(music_left[secondindex])
 
     for _, v2 in ipairs(music_left[secondindex]) do
         net.Start("chicagoRP_vehicleradio_playsong")
@@ -143,7 +134,7 @@ local function PlaySong(ply)
         net.WriteFloat(timestamp[secondindex])
         net.Send(ply) -- get players somehow
 
-        print("PlaySong Net sent!")
+        -- print("PlaySong Net sent!")
 
         break
     end
@@ -192,7 +183,7 @@ local function table_calculation()
                 break
             end
 
-            print("Song removed")
+            -- print("Song removed")
         end
         if table.IsEmpty(music_left[v.name]) then
             music_left[v.name] = table.Copy(music_list[v.name])
@@ -217,7 +208,7 @@ local function table_calculation()
                     if v3:GetNW2Bool("activeradio") == false or secondindex == nil then break end
 
                     if v3:GetNW2Bool("activeradio") == true and v.name == secondindex then
-                        print("Song played after previous ended")
+                        -- print("Song played after previous ended")
 
                         PlaySong(v3)
                     end
@@ -239,7 +230,7 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     local actualvehicle = GetRealVehicle(vehicle, ply)
     local passengertable = GetPassengerTable(vehicle, ply)
 
-    print("receiveindex received")
+    -- print("receiveindex received")
 
     local enabled = net.ReadBool()
 
@@ -267,11 +258,11 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
         PlaySong(v)
     end
 
-    print("station name received!")
+    -- print("station name received!")
 end)
 
 net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
-    print("fetchinfo received!")
+    -- print("fetchinfo received!")
 
     local station = net.ReadString()
 
@@ -281,7 +272,7 @@ net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
         net.WriteString(v2.song)
         net.Send(ply)
 
-        print("fetchinfo Net sent!")
+        -- print("fetchinfo Net sent!")
 
         break
     end

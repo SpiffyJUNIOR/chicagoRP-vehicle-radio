@@ -7,7 +7,7 @@ local stationname = nil
 local artistname = nil
 local songname = nil
 local ELEMENTS = {}
-local IconSize = 48
+local IconSize = 40
 local minIconReduction = 20
 local Dynamic = 0
 local enabled = GetConVar("cl_chicagoRP_vehicleradio_enable"):GetBool()
@@ -28,7 +28,6 @@ local circles = include("circles.lua")
 if istable(chicagoRP.radioplaylists) then
     for k, v in ipairs(chicagoRP.radioplaylists) do
         radioIcon[k] = Material(v.icon, "smooth mips")
-        print("not cached being constantly done")
     end
 end
 
@@ -113,9 +112,7 @@ end
 
 local function IsDriver(vehicle, ply)
     if !IsValid(ply) then return end
-    print(IsValid(vehicle))
     if !IsValid(vehicle) then return end
-    print(ply:InVehicle())
     if !ply:InVehicle() then return end
 
     local driver = false
@@ -123,7 +120,6 @@ local function IsDriver(vehicle, ply)
     if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
             driver = ply:IsDrivingSimfphys()
-            print(ply:IsDrivingSimfphys())
             if driver == true then
                 return driver
             elseif driver == nil or driver == false then
@@ -145,7 +141,7 @@ end
 
 net.Receive("chicagoRP_vehicleradio_playsong", function()
     local ply = LocalPlayer()
-    print("PlaySong Net received!")
+    -- print("PlaySong Net received!")
 
     -- print(IsValid(ply))
     -- print("Player Valid^^^")
@@ -160,18 +156,13 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     -- if !ply:InVehicle() then return end -- broken for some stupid reason
     if !enabled then return end
 
-    print("play song net received")
-
     local stopsong = net.ReadBool()
 
     if SONG then
         SONG:Stop()
-        print("bitchslapped that weak song, say goodbye to your aux cord privileges")
     end
 
     if stopsong == true then return end
-
-    print("PlaySong Net passed checks!")
 
     local stationname = net.ReadString()
     local url = net.ReadString()
@@ -181,9 +172,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 
     currentStation = stationname
 
-    print("URL: " .. url)
-    print("Artist: " .. artist)
-    print("Song: " .. netsongname)
+    print("Song: " .. artist .. " - " .. netsongname)
     print("TimeStamp: " .. timestamp)
 
     local realtimestamp = math.Round(timestamp, 2) + 0.35
@@ -205,7 +194,6 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
                     print(station:GetTime())
                 end
             end)
-            print("song playing")
             -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
         else
             LocalPlayer():ChatPrint("Invalid URL!")
@@ -230,13 +218,10 @@ local function StopSong()
     stationname = nil
     artistname = nil
     songname = nil
-
-    print("song stopped and index emptied")
 end
 
 local function MusicFloat(value, min, max, default)
     local value = tonumber(value)
-    print("MusicFloat", value, min, max, default)
 
     return isnumber(value) and math.Clamp(tonumber(value), min, max) or default
 end
@@ -256,8 +241,6 @@ end)
 
 net.Receive("chicagoRP_vehicleradio_stopsong", function()
     StopSong()
-
-    print("stop song net received")
 end)
 
 local function SendStation(name)
@@ -271,8 +254,6 @@ local function SendStation(name)
     net.WriteBool(true)
     net.WriteString(name)
     net.SendToServer()
-
-    print("station name sent!")
 end
 
 surface.CreateFont("VehiclesRadioVGUIFont", {
@@ -289,7 +270,6 @@ local function ElementsDestroy()
 end
 
 local function ElementsAdd(x, y, radius, alpha, bool)
-    print(bool)
     table.insert(ELEMENTS, {
         x = x,
         y = y,
@@ -300,10 +280,10 @@ local function ElementsAdd(x, y, radius, alpha, bool)
 end
 
 local function UpdateElementsSize()
-    if #ELEMENTS > 12 + 1 then
-        IconSize = 48 - (minIconReduction - minIconReduction / (#ELEMENTS + 1 - 12 - 1))
+    if #ELEMENTS > 13 then
+        IconSize = 40 - (minIconReduction - minIconReduction / (#ELEMENTS - 13)) -- (minIconReduction - minIconReduction / (#ELEMENTS - 12))
     else
-        IconSize = 48
+        IconSize = 40
     end
 end
 
@@ -344,7 +324,6 @@ net.Receive("chicagoRP_vehicleradio", function()
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
     print(IsDriver(ply:GetVehicle(), ply))
-    print("nigward")
     if (!IsDriver(ply:GetVehicle(), ply)) then return end
     if !enabled then return end
 
@@ -360,9 +339,9 @@ net.Receive("chicagoRP_vehicleradio", function()
     local motherFrame = vgui.Create("DFrame")
     motherFrame:SetSize(screenwidth, screenheight)
     motherFrame:SetVisible(true)
-    motherFrame:SetDraggable(true)
+    motherFrame:SetDraggable(false)
     motherFrame:ShowCloseButton(true)
-    motherFrame:SetTitle("Vehicle Radio")
+    motherFrame:SetTitle("")
     motherFrame:ParentToHUD()
     HideHUD = true
     stationname = currentStationPrintName or nil
@@ -377,24 +356,46 @@ net.Receive("chicagoRP_vehicleradio", function()
     motherFrame:Center()
 
     local stations = table.GetKeys(chicagoRP.radioplaylists)
-    local count = #stations
+    local count = #stations + 1
+
+    -- local arcdegrees = 360 / count -- fix radio pos with this
+    -- local radius = 300
+    -- local d = 360
+    -- ElementsDestroy()
+
+    -- for i = 1, count do
+    --     local rad = math.rad(d + arcdegrees * 0.50)
+    --     local x = math.Round(cx + math.cos(rad) * radius)
+    --     local y = math.Round(cy - math.sin(rad) * radius)
+    --     d = d - arcdegrees
+    --     if i == (count) then
+    --         ElementsAdd(x, y, IconSize, 100, true)
+    --     else
+    --         ElementsAdd(x, y, IconSize, 100, false)
+    --     end
+    --     -- ElementsAdd(x, y, IconSize, 100, false)
+    -- end
 
     if count > 0 then
-        local arcdegrees = 360 / count -- fix radio pos with this
+        local arcdegrees = 360 / count - 1 -- 300
         local radius = 300
-        local d = 360
+        local d = 250 -- 280
         ElementsDestroy()
 
         for i = 1, count do
-            local rad = math.rad(d + arcdegrees * 0.50)
-            local x = cx + math.cos(rad) * radius
-            local y = cy - math.sin(rad) * radius
-            d = d - arcdegrees
-            if i == (count - 1) then
-                ElementsAdd(x, y, IconSize, 100, true)
-            else
+            if i != (count) then
+                local rad = math.rad(d + arcdegrees * -0.50)
+                local x = math.Round(cx + math.cos(rad) * radius)
+                local y = math.Round(cy - math.sin(rad) * radius)
+                d = d - arcdegrees
                 ElementsAdd(x, y, IconSize, 100, false)
+            elseif i == (count) then
+                local Offrad = math.rad(360 + 270 / 1 * 1)
+                local Offx = math.Round(cx + math.cos(Offrad) * 300)
+                local Offy = math.Round(cy - math.sin(Offrad) * 300)
+                ElementsAdd(Offx, Offy, IconSize, 100, true)
             end
+            -- ElementsAdd(x, y, IconSize, 100, false)
         end
     else
         notification.AddLegacy("You have not installed radio stations", 0, 3)
@@ -427,26 +428,20 @@ net.Receive("chicagoRP_vehicleradio", function()
         -- print(IsValid(stationname))
         -- print(isstring(stationname))
         if isstring(stationname) then
-            -- draw.SimpleText(stationname, "VehiclesRadioVGUIFont", cx, cy - 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-            draw.SimpleTextOutlined(stationname, "VehiclesRadioVGUIFont", cx, cy - 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
+            draw.SimpleTextOutlined(stationname, "VehiclesRadioVGUIFont", cx, cy - 50, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, blackcolor)
         end
         if isstring(artistname) and isstring(songname) then
-            -- draw.SimpleText(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-            -- draw.SimpleText(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-            draw.SimpleTextOutlined(artistname, "VehiclesRadioVGUIFont", cx, cy, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
-            draw.SimpleTextOutlined(songname, "VehiclesRadioVGUIFont", cx, cy + 40, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, blackcolor)
+            draw.SimpleTextOutlined(artistname, "VehiclesRadioVGUIFont", cx, cy - 10, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, blackcolor)
+            draw.SimpleTextOutlined(songname, "VehiclesRadioVGUIFont", cx, cy + 30, whitecolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, blackcolor)
         end
     end
 
     local artistcachedname = nil
 
     for k, v in ipairs(ELEMENTS) do
-        print(v.disable)
         if v.disable == false then
             local x = v.x
             local y = v.y
-
-            print(k)
 
             x = cx - (cx - v.x)
             y = cy - (cy - v.y)
@@ -455,8 +450,8 @@ net.Receive("chicagoRP_vehicleradio", function()
 
             local radius = v.radius
             local stationcachedname = chicagoRP.radioplaylists[k].printname
-            print(cx - (cx - v.x))
-            print(cy - (cy - v.y))
+            -- print(cx - (cx - v.x))
+            -- print(cy - (cy - v.y))
 
             local stationButton = motherFrame:Add("DButton")
             stationButton:SetText("")
@@ -553,16 +548,18 @@ net.Receive("chicagoRP_vehicleradio", function()
                     net.Start("chicagoRP_vehicleradio_sendinfo")
                     net.WriteString(chicagoRP.radioplaylists[k].name)
                     net.SendToServer()
-                    print("sendinfo Net Sent!")
                 end
+
+                print(currentStation)
+                print(chicagoRP.radioplaylists[k].name)
 
                 if currentStation == chicagoRP.radioplaylists[k].name then return end
 
                 timer.Simple(1.0, function()
-                    print(IsValid(self))
-                    print(self:IsHovered())
-                    print(istable(chicagoRP.radioplaylists[k]))
-                    print(chicagoRP.radioplaylists[k].name)
+                    -- print(IsValid(self))
+                    -- print(self:IsHovered())
+                    -- print(istable(chicagoRP.radioplaylists[k]))
+                    -- print(chicagoRP.radioplaylists[k].name)
                     if IsValid(self) and self:IsHovered() and istable(chicagoRP.radioplaylists[k]) then
                         SendStation(chicagoRP.radioplaylists[k].name)
                         currentStation = chicagoRP.radioplaylists[k].name
@@ -579,13 +576,9 @@ net.Receive("chicagoRP_vehicleradio", function()
                 songcachedname = song
             end)
         elseif v.disable == true then
-            print("RADIO OFF BUTTON")
-
             local x = v.x
             local y = v.y
             local radius = v.radius
-
-            print(k)
 
             x = cx - (cx - v.x)
             y = cy - (cy - v.y)
@@ -719,12 +712,13 @@ print("chicagoRP GUI loaded!")
 
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
--- previous stations song continuing to play when switching (fucking annoying as shit, fix this)
--- radio off button appears at end of wheel rather than bottom of the screen
+-- previous stations song continuing to play when switching (doesn't happen as often now but still an issue)
+-- changing seat adds new nw2 and makes music play
 
 -- to-do:
 -- keep hover on station if currentstation == k or whatever
 -- send station and song info to client when entering car
+-- make icons transparent when not hovered
 -- make radio open button hold open
 -- add radio wheel hover like GTA 5
 -- add random chance of album being inserted
