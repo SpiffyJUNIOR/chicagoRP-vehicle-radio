@@ -227,12 +227,10 @@ end
 cvars.AddChangeCallback("cl_chicagoRP_vehicleradio_volume", function(convar_name, value_old, value_new)
     local value = tonumber(value_new)
     local value_new = isnumber(value) and value or 1
-    local value_new1 = MusicFloat(value_new, 0, 0.25, 0.05)
-    local new_volume = tonumber(value_new1)
 
     timer.Simple(0, function()
         if SONG then
-            SONG:SetVolume(new_volume)
+            SONG:SetVolume(value_new)
         end
     end)
 end)
@@ -434,7 +432,34 @@ net.Receive("chicagoRP_vehicleradio", function()
         end
     end
 
+    local stationcachedname = nil
     local artistcachedname = nil
+    local songcachedname = nil
+
+    for _, v2 in ipairs(chicagoRP.radioplaylists) do
+        if currentStation == v2.name then
+            stationcachedname = v2.printname
+            print("stationname set")
+
+            break
+        end
+    end
+
+    net.Start("chicagoRP_vehicleradio_sendinfo")
+    net.WriteString(currentStation)
+    net.SendToServer()
+
+    net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
+        local artist = net.ReadString()
+        local song = net.ReadString()
+
+        artistcachedname = artist
+        songcachedname = song
+        artistname = artistcachedname
+        songname = songcachedname
+    end)
+
+    stationname = stationcachedname
 
     for k, v in ipairs(ELEMENTS) do
         if v.disable == false then
@@ -444,12 +469,8 @@ net.Receive("chicagoRP_vehicleradio", function()
             x = cx - (cx - v.x)
             y = cy - (cy - v.y)
 
-            -- print(chicagoRP.radioplaylists[k])
-
             local radius = v.radius
-            local stationcachedname = chicagoRP.radioplaylists[k].printname
-            -- print(cx - (cx - v.x))
-            -- print(cy - (cy - v.y))
+            -- local stationcachedname = chicagoRP.radioplaylists[k].printname
 
             local stationButton = motherFrame:Add("DButton")
             stationButton:SetText("")
@@ -489,7 +510,7 @@ net.Receive("chicagoRP_vehicleradio", function()
                 if hovered then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
-                    stationname = stationcachedname
+                    stationname = chicagoRP.radioplaylists[k].printname
                     artistname = artistcachedname
                     songname = songcachedname
 
@@ -565,14 +586,6 @@ net.Receive("chicagoRP_vehicleradio", function()
                     end
                 end)
             end
-
-            net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
-                local artist = net.ReadString()
-                local song = net.ReadString()
-
-                artistcachedname = artist
-                songcachedname = song
-            end)
         elseif v.disable == true then
             local x = v.x
             local y = v.y
@@ -667,20 +680,6 @@ net.Receive("chicagoRP_vehicleradio", function()
     gameSettingsScrollPanel:Dock(LEFT)
     gameSettingsScrollPanel:SetSize(200, 50)
 
-    for _, v in ipairs(chicagoRP.radioplaylists) do
-        local categoryButton = gameSettingsScrollPanel:Add("DButton")
-        categoryButton:SetText(v.name)
-        categoryButton:Dock(TOP)
-        categoryButton:DockMargin(0, 10, 0, 0)
-        categoryButton:SetSize(200, 50)
-
-        function categoryButton:DoClick()
-            timer.Simple(0.5, function()
-                SendStation(v.name)
-            end)
-        end
-    end
-
     local debugStopSongButton = gameSettingsScrollPanel:Add("DButton")
     debugStopSongButton:SetText("STOP SONG")
     debugStopSongButton:Dock(TOP)
@@ -706,20 +705,17 @@ net.Receive("chicagoRP_vehicleradio", function()
     OpenMotherFrame = motherFrame
 end)
 
-print("chicagoRP GUI loaded!")
+print("chicagoRP Vehicle Radio GUI loaded!")
 
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
--- previous stations song continuing to play when switching (doesn't happen as often now but still an issue)
--- PlayerEnteredVehicle IsValid and isstring checks broken (isvalid always false and isstring always true)
+-- previous stations song continuing to play when switching (doesn't happen as often now but still an issue, try stopping/defining SONG variable sooner)
 
 -- to-do:
--- add https://wiki.facepunch.com/gmod/Vehicle:GetPassenger to GetPassengerTable
--- send station and song info to client when entering car
--- keep hover on station if currentstation == k or whatever
--- make icons transparent when not hovered
--- make radio open button hold open
--- add radio wheel hover like GTA 5
+-- keep hover on station if currentstation == k and nothing else is hovered (check with vgui.GetHoveredPanel)
+-- make icons transparent when not hovered (check freddy15's alpha code)
+-- make radio open button hold open (idk how to do this)
+-- add radio wheel hover like GTA 5 (idk how to hover something based off radius, maybe try limiting where mouse can go?)
 -- add random chance of album being inserted
 -- add DJ/commerical support
 -- make layout pos and size match GTA 5's

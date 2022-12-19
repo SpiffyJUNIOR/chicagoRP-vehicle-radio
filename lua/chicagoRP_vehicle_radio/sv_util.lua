@@ -17,6 +17,10 @@ local debugmode = true
 local scriptenabled = GetConVar("sv_chicagoRP_vehicleradio_enable"):GetBool()
 local randomstation = GetConVar("sv_chicagoRP_vehicleradio_randomstation"):GetBool()
 
+local function isempty(s)
+    return s == nil or s == ''
+end
+
 local function GetRealVehicle(vehicle, ply)
     if !IsValid(ply) then return end
     if !IsValid(vehicle) then return end
@@ -70,7 +74,16 @@ local function GetPassengerTable(vehicle, ply)
         return vehicle:SV_GetAllPlayers()
     else
         print("regular vehicle")
-        return vehicle:GetDriver()
+        local regulartable = {}
+        -- table.insert(regulartable, vehicle:GetDriver())
+        for i = 1, 8 do
+            if IsValid(vehicle:GetPassenger(i)) then
+                table.insert(regulartable, vehicle:GetPassenger(i))
+            end
+        end
+        print(regulartable)
+        PrintTable(regulartable)
+        return regulartable
     end
 end
 
@@ -300,8 +313,10 @@ hook.Add("PlayerEnteredVehicle", "chicagoRP_vehicleradio_leftvehicle", function(
     print(stationname)
     print(isstring(stationname))
     print(IsValid(stationname))
+    print(stationname == nil)
+    print(isempty(stationname))
 
-    if !isstring(stationname) and randomstation then
+    if isempty(stationname) and randomstation then
         for _, v in RandomPairs(chicagoRP.radioplaylists) do
             stationname = v.name
 
@@ -392,6 +407,7 @@ concommand.Add("getradio", function(ply)
     if actualvehicle == nil then return end
 
     local stationname = actualvehicle:GetNW2String("currentstation")
+    print(isempty(stationname))
     print(stationname)
     print(ply:GetNW2Bool("activeradio"))
 end)
