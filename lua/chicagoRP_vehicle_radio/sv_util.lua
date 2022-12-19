@@ -62,17 +62,16 @@ local function GetPassengerTable(vehicle, ply)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    local finaltable = nil
-
-    if ConVarExists("sv_simfphys_enabledamage") then -- no GetSimfphysState function so we do convar check
-        if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
-            return GetSimfphysPassengers(vehicle, ply)
-        end
-    elseif SVMOD:GetAddonState() == true then
-        if SVMOD:IsVehicle(vehicle) then
-            return vehicle:SV_GetAllPlayers()
-        end
-    else return vehicle:GetDriver() end
+    if ConVarExists("sv_simfphys_enabledamage") and IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then -- no GetSimfphysState function so we do convar check
+        print("simfphys vehicle")
+        return GetSimfphysPassengers(vehicle, ply)
+    elseif SVMOD and SVMOD:GetAddonState() == true and SVMOD:IsVehicle(vehicle) then
+        print("svmod vehicle")
+        return vehicle:SV_GetAllPlayers()
+    else
+        print("regular vehicle")
+        return vehicle:GetDriver()
+    end
 end
 
 for _, v in ipairs(chicagoRP.radioplaylists) do
@@ -115,6 +114,8 @@ local function PlaySong(ply)
     if secondindex == nil or !scriptenabled then return end
 
     if ply == nil then ply = Entity(1) end
+
+    print(secondindex)
 
     timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
 
@@ -252,10 +253,16 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
 
     actualvehicle:SetNW2String("currentstation", stationname)
 
-    for _, v in ipairs(passengertable) do
-        -- PrintTable(passengertable)
-        -- print(v)
-        PlaySong(v)
+    if istable(passengertable) then
+        for _, v in ipairs(passengertable) do
+            -- PrintTable(passengertable)
+            -- print(v)
+            PlaySong(v)
+        end
+    elseif IsValid(passengertable) then
+        PlaySong(passengertable)
+    else
+        print("passengertable empty!")
     end
 
     -- print("station name received!")
@@ -290,7 +297,11 @@ hook.Add("PlayerEnteredVehicle", "chicagoRP_vehicleradio_leftvehicle", function(
 
     if !scriptenabled then return end
 
-    if !IsValid(stationname) and randomstation then
+    print(stationname)
+    print(isstring(stationname))
+    print(IsValid(stationname))
+
+    if !isstring(stationname) and randomstation then
         for _, v in RandomPairs(chicagoRP.radioplaylists) do
             stationname = v.name
 
@@ -366,5 +377,23 @@ concommand.Add("print_timers", function(ply)
     end
 end)
 
+concommand.Add("getrealvehicle", function(ply)
+    local vehicle = ply:GetVehicle()
+    if vehicle == nil then return end
+
+    print(GetRealVehicle(vehicle, ply))
+end)
+
+concommand.Add("getradio", function(ply)
+    local vehiclett = ply:GetVehicle()
+    if vehiclett == nil then return end
+    local actualvehicle = GetRealVehicle(vehiclett, ply)
+
+    if actualvehicle == nil then return end
+
+    local stationname = actualvehicle:GetNW2String("currentstation")
+    print(stationname)
+    print(ply:GetNW2Bool("activeradio"))
+end)
 
 print("chicagoRP Vehicle Radio server util loaded!")

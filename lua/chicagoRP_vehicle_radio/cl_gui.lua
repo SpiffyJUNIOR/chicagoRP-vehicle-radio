@@ -25,7 +25,7 @@ local radioOffMat = Material("chicagorp_vehicleradio/radiooff.png", "smooth mips
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
 
-if istable(chicagoRP.radioplaylists) then
+if istable(chicagoRP.radioplaylists) then -- fix this, make local function that returns end if materials already exist
     for k, v in ipairs(chicagoRP.radioplaylists) do
         radioIcon[k] = Material(v.icon, "smooth mips")
     end
@@ -91,23 +91,21 @@ local function GetSimfphysPassengers(vehicle)
     return plytable
 end
 
-local function GetPassengerTable(vehicle)
-    local ply = LocalPlayer()
+local function GetPassengerTable(vehicle, ply)
     if !IsValid(ply) then return end
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    local finaltable = nil
-
-    if ConVarExists("sv_simfphys_enabledamage") then
-        if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
-            return GetSimfphysPassengers(vehicle)
-        end
-    elseif SVMOD:GetAddonState() == true then
-        if SVMOD:IsVehicle(vehicle) then
-            return vehicle:SV_GetAllPlayers()
-        end
-    else return vehicle:GetDriver() end
+    if ConVarExists("sv_simfphys_enabledamage") and IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then -- no GetSimfphysState function so we do convar check
+        print("simfphys vehicle")
+        return GetSimfphysPassengers(vehicle, ply)
+    elseif SVMOD and SVMOD:GetAddonState() == true and SVMOD:IsVehicle(vehicle) then
+        print("svmod vehicle")
+        return vehicle:SV_GetAllPlayers()
+    else
+        print("regular vehicle")
+        return vehicle:GetDriver()
+    end
 end
 
 local function IsDriver(vehicle, ply)
@@ -713,11 +711,12 @@ print("chicagoRP GUI loaded!")
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
 -- previous stations song continuing to play when switching (doesn't happen as often now but still an issue)
--- changing seat adds new nw2 and makes music play
+-- PlayerEnteredVehicle IsValid and isstring checks broken (isvalid always false and isstring always true)
 
 -- to-do:
--- keep hover on station if currentstation == k or whatever
+-- add https://wiki.facepunch.com/gmod/Vehicle:GetPassenger to GetPassengerTable
 -- send station and song info to client when entering car
+-- keep hover on station if currentstation == k or whatever
 -- make icons transparent when not hovered
 -- make radio open button hold open
 -- add radio wheel hover like GTA 5
