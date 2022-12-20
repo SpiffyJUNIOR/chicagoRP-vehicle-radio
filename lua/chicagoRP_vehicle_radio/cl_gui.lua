@@ -31,6 +31,10 @@ if istable(chicagoRP.radioplaylists) then -- fix this, make local function that 
     end
 end
 
+local function isempty(s)
+    return s == nil or s == ''
+end
+
 local function BlurBackground(panel)
     if (!IsValid(panel) or !panel:IsVisible()) then return end
     local layers, density, alpha = 1, 1, 100
@@ -169,6 +173,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     local timestamp = net.ReadFloat()
 
     currentStation = stationname
+    print(currentStation)
 
     print("Song: " .. artist .. " - " .. netsongname)
     print("TimeStamp: " .. timestamp)
@@ -445,9 +450,16 @@ net.Receive("chicagoRP_vehicleradio", function()
         end
     end
 
-    net.Start("chicagoRP_vehicleradio_sendinfo")
-    net.WriteString(currentStation)
-    net.SendToServer()
+    print(currentStation)
+    print("intial currentStation")
+
+    if !isempty(currentStation) then
+        net.Start("chicagoRP_vehicleradio_sendinfo")
+        net.WriteString(currentStation)
+        net.SendToServer()
+    else
+        stationcachedname = "Radio Off"
+    end
 
     net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
         local artist = net.ReadString()
@@ -507,8 +519,13 @@ net.Receive("chicagoRP_vehicleradio", function()
                 local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
                 DisableClipping(true)
 
-                if hovered then
+                if hovered or currentstation == chicagoRP.radioplaylists[k].name then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
+
+                    -- print(currentstation)
+                    -- print(chicagoRP.radioplaylists[k].name)
+                    -- print(self)
+                    -- print("should be hovered")
 
                     stationname = chicagoRP.radioplaylists[k].printname
                     artistname = artistcachedname
