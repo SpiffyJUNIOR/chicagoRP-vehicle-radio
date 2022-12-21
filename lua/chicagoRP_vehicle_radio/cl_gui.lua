@@ -356,6 +356,42 @@ net.Receive("chicagoRP_vehicleradio", function()
     motherFrame:SetMouseInputEnabled(true)
     motherFrame:Center()
 
+    local stationcachedname = nil
+    local artistcachedname = nil
+    local songcachedname = nil
+
+    for _, v2 in ipairs(chicagoRP.radioplaylists) do
+        if currentStation == v2.name then
+            stationcachedname = v2.printname
+            print("stationname set")
+
+            break
+        end
+    end
+
+    print(currentStation)
+    print("intial currentStation")
+
+    if !isempty(currentStation) then
+        net.Start("chicagoRP_vehicleradio_sendinfo")
+        net.WriteString(currentStation)
+        net.SendToServer()
+    else
+        stationcachedname = "Radio Off"
+    end
+
+    net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
+        local artist = net.ReadString()
+        local song = net.ReadString()
+
+        artistcachedname = artist
+        songcachedname = song
+        artistname = artistcachedname
+        songname = songcachedname
+    end)
+
+    stationname = stationcachedname
+
     local stations = table.GetKeys(chicagoRP.radioplaylists)
     local count = #stations + 1
 
@@ -437,41 +473,7 @@ net.Receive("chicagoRP_vehicleradio", function()
         end
     end
 
-    local stationcachedname = nil
-    local artistcachedname = nil
-    local songcachedname = nil
-
-    for _, v2 in ipairs(chicagoRP.radioplaylists) do
-        if currentStation == v2.name then
-            stationcachedname = v2.printname
-            print("stationname set")
-
-            break
-        end
-    end
-
-    print(currentStation)
-    print("intial currentStation")
-
-    if !isempty(currentStation) then
-        net.Start("chicagoRP_vehicleradio_sendinfo")
-        net.WriteString(currentStation)
-        net.SendToServer()
-    else
-        stationcachedname = "Radio Off"
-    end
-
-    net.Receive("chicagoRP_vehicleradio_receiveinfo", function()
-        local artist = net.ReadString()
-        local song = net.ReadString()
-
-        artistcachedname = artist
-        songcachedname = song
-        artistname = artistcachedname
-        songname = songcachedname
-    end)
-
-    stationname = stationcachedname
+    local hoverindex = currentStation
 
     for k, v in ipairs(ELEMENTS) do
         if v.disable == false then
@@ -488,6 +490,8 @@ net.Receive("chicagoRP_vehicleradio", function()
             stationButton:SetText("")
             stationButton:SetSize(radius * 2.2, radius * 2.2)
             stationButton:SetPos(x - (radius * 2.2) / 2, y - (radius * 2.2) / 2)
+
+            local stationtostations = chicagoRP.radioplaylists[k].name
 
             -- first one
             -- radius: from 48 to 52
@@ -515,36 +519,41 @@ net.Receive("chicagoRP_vehicleradio", function()
             -- if cursorx > x - (radius / 2) and cursorx < x + (radius / 2) and cursory > y - (radius / 2) and cursory < y + (radius / 2) then
             function stationButton:Paint(w, h) -- 230, 45, 40 and 245, 135, 70
                 local hovered = self:IsHovered()
-                local buf, step = self.__hoverBuf or 0, RealFrameTime() * 1
-                local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 1
+                local hoveredpanel = vgui.GetHoveredPanel()
+                local buf, step = self.__hoverBuf or 0, RealFrameTime() * 3
+                local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 3
                 DisableClipping(true)
 
-                if hovered or currentstation == chicagoRP.radioplaylists[k].name then
+                self.value = chicagoRP.radioplaylists[k].name
+
+                print(vgui.GetHoveredPanel())
+                print(currentStation)
+                print(hoverindex)
+
+                if (hovered or (hoveredpanel == motherframe and (currentStation == stationtostations or hoverindex == stationtostations))) then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
 
-                    -- print(currentstation)
-                    -- print(chicagoRP.radioplaylists[k].name)
-                    -- print(self)
-                    -- print("should be hovered")
+                    print(self.value)
+                    print(currentStation)
 
                     stationname = chicagoRP.radioplaylists[k].printname
                     artistname = artistcachedname
                     songname = songcachedname
-
-                    -- print("X: " .. x)
-                    -- print("Y: " .. y)
-                    -- print("Radius: " .. radius)
-                else
+                    -- hoverindex is ambient, but currentstation is still atmospheric_drum_and_bass
+                elseif !hovered and (currentStation != stationtostations or hoverindex != stationtostations) then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.0)
+                    -- NOT hovered and currentStation NOT self and hoverindex NOT self
                 end
 
                 -- print("CursorX: " .. cursorx)
                 -- print("CursorY: " .. cursory)
 
-                if hovered and buf < 1 then
-                    buf = math.min(1, step + buf)
-                elseif !hovered and buf > 0 then
-                    buf = math.max(0, buf - step)
+                if (hovered or (hoveredpanel == motherframe and (currentStation == stationtostations or hoverindex == stationtostations))) and buf < 1 then
+                    buf = math.min(1, step + buf) 
+                    -- IS hovered
+                    -- NOT hovered, currentstation IS equal to self's playlist.name, hoveredpanel IS motherframe
+                elseif !hovered and (currentStation != stationtostations or hoverindex != stationtostations) and buf > 0 then
+                    buf = math.max(0, buf - step) -- not hovered AND (currentstation NOT equal to self's playlist.name OR other button hovered)
                 end
 
                 self.__hoverBuf = buf
@@ -558,9 +567,9 @@ net.Receive("chicagoRP_vehicleradio", function()
 
                 drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
 
-                if hovered and Outlinebuf < 1 then
+                if (hovered or (hoveredpanel == motherframe and (currentStation == stationtostations or hoverindex == stationtostations))) and buf < 1 then
                     Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
-                elseif !hovered and Outlinebuf > 0 then
+                elseif !hovered and (currentStation != chicagoRP.radioplaylists[k].name or hoverindex != chicagoRP.radioplaylists[k].name) and buf > 0 then
                     Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
                 end
 
@@ -588,6 +597,8 @@ net.Receive("chicagoRP_vehicleradio", function()
 
                 print(currentStation)
                 print(chicagoRP.radioplaylists[k].name)
+
+                hoverindex = chicagoRP.radioplaylists[k].name
 
                 if currentStation == chicagoRP.radioplaylists[k].name then return end
 
@@ -727,6 +738,7 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
 -- previous stations song continuing to play when switching (doesn't happen as often now but still an issue, try stopping/defining SONG variable sooner)
+-- song and artist name don't immediately switch to currentstation's one on UI open if you hover on other station then exit UI
 
 -- to-do:
 -- keep hover on station if currentstation == k and nothing else is hovered (check with vgui.GetHoveredPanel)
