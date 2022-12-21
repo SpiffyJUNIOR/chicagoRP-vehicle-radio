@@ -288,7 +288,7 @@ local function UpdateElementsSize()
     end
 end
 
-local function drawStationCircle(x, y, radius, color, k)
+local function drawStationCircle(x, y, radius, alpha, color, k)
     local filled = circles.New(CIRCLE_FILLED, radius, x, y)
     filled:SetDistance(1)
     filled:SetMaterial(true)
@@ -296,7 +296,7 @@ local function drawStationCircle(x, y, radius, color, k)
 
     filled()
 
-    surface.SetDrawColor(255, 255, 255, 255)
+    surface.SetDrawColor(255, 255, 255, alpha)
     surface.SetMaterial(radioIcon[k])
     surface.DrawTexturedRectRotated(x, y, IconSize * 2, IconSize * 2, 0)
 end
@@ -522,6 +522,7 @@ net.Receive("chicagoRP_vehicleradio", function()
                 local hoveredpanel = vgui.GetHoveredPanel()
                 local buf, step = self.__hoverBuf or 0, RealFrameTime() * 3
                 local Outlinebuf, Outlinestep = self.__hoverOutlineBuf or 0, RealFrameTime() * 3
+                local iconalpha = 100
                 DisableClipping(true)
 
                 self.value = chicagoRP.radioplaylists[k].name
@@ -530,8 +531,9 @@ net.Receive("chicagoRP_vehicleradio", function()
                 print(currentStation)
                 print(hoverindex)
 
-                if (hovered or (hoveredpanel == motherframe and (currentStation == stationtostations or hoverindex == stationtostations))) then
+                if (hovered or (hoveredpanel == motherframe and hoverindex == stationtostations) then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
+                    iconalpha = Lerp(math.min(FrameTime() * 5, 1), iconalpha, iconalpha * 2.55)
 
                     print(self.value)
                     print(currentStation)
@@ -540,7 +542,7 @@ net.Receive("chicagoRP_vehicleradio", function()
                     artistname = artistcachedname
                     songname = songcachedname
                     -- hoverindex is ambient, but currentstation is still atmospheric_drum_and_bass
-                elseif !hovered and (currentStation != stationtostations or hoverindex != stationtostations) then
+                elseif !hovered and hoverindex != stationtostations then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.0)
                     -- NOT hovered and currentStation NOT self and hoverindex NOT self
                 end
@@ -548,11 +550,11 @@ net.Receive("chicagoRP_vehicleradio", function()
                 -- print("CursorX: " .. cursorx)
                 -- print("CursorY: " .. cursory)
 
-                if (hovered or (hoveredpanel == motherframe and (currentStation == stationtostations or hoverindex == stationtostations))) and buf < 1 then
+                if (hovered or (hoveredpanel == motherframe and hoverindex == stationtostations) and buf < 1 then
                     buf = math.min(1, step + buf) 
                     -- IS hovered
                     -- NOT hovered, currentstation IS equal to self's playlist.name, hoveredpanel IS motherframe
-                elseif !hovered and (currentStation != stationtostations or hoverindex != stationtostations) and buf > 0 then
+                elseif !hovered and hoverindex != stationtostations and buf > 0 then
                     buf = math.max(0, buf - step) -- not hovered AND (currentstation NOT equal to self's playlist.name OR other button hovered)
                 end
 
@@ -565,11 +567,11 @@ net.Receive("chicagoRP_vehicleradio", function()
                 graynormal.b = clr
                 graynormal.a = alpha
 
-                drawStationCircle(w / 2, h / 2, v.radius * 1.2, graynormal, k)
+                drawStationCircle(w / 2, h / 2, v.radius * 1.2, iconalpha, graynormal, k)
 
-                if (hovered or (hoveredpanel == motherframe and (currentStation == stationtostations or hoverindex == stationtostations))) and buf < 1 then
+                if (hovered or (hoveredpanel == motherframe and hoverindex == stationtostations) and buf < 1 then
                     Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
-                elseif !hovered and (currentStation != chicagoRP.radioplaylists[k].name or hoverindex != chicagoRP.radioplaylists[k].name) and buf > 0 then
+                elseif !hovered and hoverindex != stationtostations and buf > 0 then
                     Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
                 end
 
@@ -598,7 +600,11 @@ net.Receive("chicagoRP_vehicleradio", function()
                 print(currentStation)
                 print(chicagoRP.radioplaylists[k].name)
 
-                hoverindex = chicagoRP.radioplaylists[k].name
+                if currentStation == chicagoRP.radioplaylists[k].name then -- if alternative_metal == alternative_metal then hover on alternative_metal
+                    hoverindex = chicagoRP.radioplaylists[k].name
+                elseif currentStation != chicagoRP.radioplaylists[k].name then -- if alternative_metal == ambient hover on alternative_metal
+                    hoverindex = chicagoRP.radioplaylists[k].name
+                end
 
                 if currentStation == chicagoRP.radioplaylists[k].name then return end
 
@@ -613,6 +619,12 @@ net.Receive("chicagoRP_vehicleradio", function()
                         currentStationPrintName = chicagoRP.radioplaylists[k].printname
                     end
                 end)
+            end
+
+            function stationButton:OnCursorExited()
+                if currentStation != chicagoRP.radioplaylists[k].name then
+                    hoverindex = chicagoRP.radioplaylists[k].name
+                end
             end
         elseif v.disable == true then
             local x = v.x
@@ -742,7 +754,7 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 
 -- to-do:
 -- keep hover on station if currentstation == k and nothing else is hovered (check with vgui.GetHoveredPanel)
--- make icons transparent when not hovered (check freddy15's alpha code)
+-- make icons transparent when not hovered (test)
 -- make radio open button hold open (idk how to do this)
 -- add radio wheel hover like GTA 5 (idk how to hover something based off radius, maybe try limiting where mouse can go?)
 -- add random chance of album being inserted
