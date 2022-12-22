@@ -8,6 +8,8 @@ util.AddNetworkString("chicagoRP_vehicleradio_stopsong")
 local StartPosition = StartPosition or {}
 local NextSongTime = NextSongTime or {}
 local timestamp = timestamp or {}
+local DJTalking = DJTalking or {}
+local NoInterupt = NoInterupt or {}
 
 local music_list = music_list or {}
 local music_left = music_left or {}
@@ -15,6 +17,7 @@ local music_left = music_left or {}
 local debugmode = true
 
 local scriptenabled = GetConVar("sv_chicagoRP_vehicleradio_enable"):GetBool()
+local djenabled = GetConVar("sv_chicagoRP_vehicleradio_DJ"):GetBool()
 local randomstation = GetConVar("sv_chicagoRP_vehicleradio_randomstation"):GetBool()
 
 local function isempty(s)
@@ -26,7 +29,7 @@ local function GetRealVehicle(vehicle, ply)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then -- no GetSimfphysState function so we do convar check
+    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
            return ply:GetVehicle():GetParent()
         elseif SVMOD and SVMOD:IsVehicle(vehicle) then
@@ -34,6 +37,8 @@ local function GetRealVehicle(vehicle, ply)
         else
             return ply:GetVehicle()
         end
+    else
+        return ply:GetVehicle()
     end
 end
 
@@ -103,6 +108,24 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 
         music_left[v.name] = table.Copy(music_list[v.name])
 
+        for _, v2 in ipairs (music_left[v.name]) do
+            local numbergen = math.random(0, 100)
+
+            if !isempty(v2.chance) then
+                if numbergen => v2.chance then
+                    if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                        for _, v3 in ipairs (chicagoRP[v2.playlist]) do
+                            table.insert(music_left[v.name], 1)
+                        end
+                    end
+                elseif numbergen < v2.chance
+                    table.remove(music_left[v.name], 1)
+                end
+            end
+
+            break -- if nobody got me i know break got me :pray:
+        end
+
         table.Shuffle(music_left[v.name])
 
         print("music_left table generated!")
@@ -112,9 +135,58 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
             NextSongTime[v.name] = StartPosition[v.name] + v2.length
             print("Inital StartPosition and NextSongTime set!")
 
+            DJTalking[v.name] = false
+            NoInterupt[v.name] = false
+
             break
         end
     end
+end
+
+local function PlayDJVoiceline(ply)
+    -- print("PlayDJVoiceline ran!")
+
+    local vehicle = ply:GetVehicle()
+    local actualvehicle = GetRealVehicle(vehicle, ply)
+    local secondindex = actualvehicle:GetNW2String("currentstation")
+
+    if secondindex == nil or !scriptenabled or !djenabled then return end
+
+    print(secondindex)
+
+    timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+
+    -- PrintTable(timestamp)
+    -- print(StartPosition[secondindex])
+
+    -- PrintTable(music_left[secondindex])
+
+    for _, v2 in ipairs(chicagoRP_DJ[secondindex]) do
+        net.Start("chicagoRP_vehicleradio_playsong")
+        net.WriteBool(false)
+        net.WriteString(secondindex)
+        net.WriteString(v2.url)
+        net.WriteString("")
+        net.WriteString("")
+        print(timestamp[secondindex])
+        net.WriteFloat(timestamp[secondindex])
+        net.Send(ply)
+
+        -- print("PlayDJVoiceline Net sent!")
+
+        break
+    end
+
+    -- if debugmode == true then
+    --     for _, v in ipairs(music_left[secondindex]) do
+    --         print(("CURRENT SONG: %s"):format(v.artist .. " - " .. v.song))
+    --         print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(v.length)))
+
+    --         break
+    --     end
+
+    --     -- PrintTable(music_left)
+    -- end
 end
 
 local function PlaySong(ply)
@@ -125,8 +197,6 @@ local function PlaySong(ply)
     local secondindex = actualvehicle:GetNW2String("currentstation")
 
     if secondindex == nil or !scriptenabled then return end
-
-    if ply == nil then ply = Entity(1) end
 
     print(secondindex)
 
@@ -169,28 +239,71 @@ local function table_calculation()
     if !scriptenabled then return end
 
     for _, v in ipairs(chicagoRP.radioplaylists) do
-        if NextSongTime[v.name] <= SysTime() and !table.IsEmpty(music_left[v.name]) then
+        if NextSongTime[v.name] <= SysTime() + 2 and !table.IsEmpty(music_left[v.name]) then
             table.remove(music_left[v.name], 1)
 
-            for _, v2 in ipairs (music_left[v.name]) do
-                StartPosition[v.name] = SysTime()
-                NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                print("Future StartPosition and NextSongTime set!")
+            DJTalking[v.name] = false
+            NoInterupt[v.name] = false
 
-                for _, v3 in ipairs (player.GetAll()) do
-                    local vehicle = v3:GetVehicle()
+            for _, v2 in ipairs (music_left[v.name]) do
+                local numbergen = math.random(0, 100)
+
+                if !isempty(v2.chance) then
+                    if numbergen => v2.chance then
+                        if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                            for _, v3 in ipairs (chicagoRP[v2.playlist]) do
+                                table.insert(music_left[v.name], 1)
+                            end
+                            NoInterupt[v.name] = true
+                        else
+                            NoInterupt[v.name] = false
+                        end
+                    elseif numbergen < v2.chance
+                        table.remove(music_left[v.name], 1)
+                    end
+                end
+
+                local djTableShuffled = djTableShuffled or {}
+
+                if djenabled and istable(chicagoRP_DJ[v.name]) then
+                    djTableShuffled[v.name] = table.Shuffle(chicagoRP_DJ[v.name])
+                end
+
+                if djenabled and istable(chicagoRP_DJ[v.name]) and DJTalking[v.name] == false then
+                    for _, v3 in ipairs (djTableShuffled[v.name]) do
+                        StartPosition[v.name] = SysTime()
+                        NextSongTime[v.name] = StartPosition[v.name] + v3.length
+
+                        DJTalking[v.name] = true
+
+                        break
+                    end
+                    print("Future DJ StartPosition and NextSongTime set!")
+                elseif !djenabled or !istable(chicagoRP_DJ[v.name]) or DJTalking[v.name] == true then
+                    StartPosition[v.name] = SysTime()
+                    NextSongTime[v.name] = StartPosition[v.name] + v2.length
+                    DJTalking[v.name] = false
+                    print("Future Song StartPosition and NextSongTime set!")
+                end
+
+                for _, v4 in ipairs (player.GetAll()) do
+                    local vehicle = v4:GetVehicle()
 
                     if !IsValid(vehicle) then break end
 
-                    local actualvehicle = GetRealVehicle(vehicle, v3)
+                    local actualvehicle = GetRealVehicle(vehicle, v4)
                     local secondindex = actualvehicle:GetNW2String("currentstation")
 
-                    if v3:GetNW2Bool("activeradio") == false or secondindex == nil then break end
+                    if v4:GetNW2Bool("activeradio") == false or secondindex == nil then break end
 
-                    if v3:GetNW2Bool("activeradio") == true and v.name == secondindex then
+                    if v4:GetNW2Bool("activeradio") == true and v.name == secondindex then
                         print("Song played after previous ended")
 
-                        PlaySong(v3)
+                        if DJTalking[v.name] == false then
+                            PlaySong(v4)
+                        elseif DJTalking[v.name] == true then
+                            PlayDJVoiceline(v4)
+                        end
                     end
                 end
 
@@ -207,6 +320,20 @@ local function table_calculation()
             print("Table regenerated")
 
             for _, v2 in ipairs (music_left[v.name]) do
+                local numbergen = math.random(0, 100)
+
+                if !isempty(v2.chance) then
+                    if numbergen => v2.chance then
+                        if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                            for _, v3 in ipairs (chicagoRP[v2.playlist]) do
+                                table.insert(music_left[v.name], 1)
+                            end
+                        end
+                    elseif numbergen < v2.chance
+                        table.remove(music_left[v.name], 1)
+                    end
+                end
+                
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
                 print("Regenerated StartPosition and NextSongTime set!")
@@ -353,9 +480,9 @@ end)
 
 concommand.Add("chicagoRP_vehicleradio", function(ply) -- how we close/open this based on bind being held?
     if !IsValid(ply) then return end
-    net.Start("chicagoRP_vehicleradio")
-    net.WriteBool(true)
-    net.Send(ply)
+    -- net.Start("chicagoRP_vehicleradio")
+    -- net.WriteBool(true)
+    -- net.Send(ply)
 end)
 
 concommand.Add("print_musiclist", function(ply)
