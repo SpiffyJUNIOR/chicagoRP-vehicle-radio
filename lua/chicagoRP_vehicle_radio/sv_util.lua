@@ -3,6 +3,7 @@ util.AddNetworkString("chicagoRP_vehicleradio_sendinfo")
 util.AddNetworkString("chicagoRP_vehicleradio_receiveinfo")
 util.AddNetworkString("chicagoRP_vehicleradio_receiveindex")
 util.AddNetworkString("chicagoRP_vehicleradio_playsong")
+util.AddNetworkString("chicagoRP_vehicleradio_playdjvoiceline")
 util.AddNetworkString("chicagoRP_vehicleradio_stopsong")
 
 local StartPosition = StartPosition or {}
@@ -162,7 +163,7 @@ local function PlayDJVoiceline(ply)
     -- PrintTable(music_left[secondindex])
 
     for _, v2 in ipairs(chicagoRP_DJ[secondindex]) do
-        net.Start("chicagoRP_vehicleradio_playsong")
+        net.Start("chicagoRP_vehicleradio_playdjvoiceline")
         net.WriteBool(false)
         net.WriteString(secondindex)
         net.WriteString(v2.url)
@@ -172,7 +173,7 @@ local function PlayDJVoiceline(ply)
         net.WriteFloat(timestamp[secondindex])
         net.Send(ply)
 
-        -- print("PlayDJVoiceline Net sent!")
+        print("PlayDJVoiceline Net sent!")
 
         break
     end
@@ -269,7 +270,7 @@ local function table_calculation()
                     djTableShuffled[v.name] = table.Shuffle(chicagoRP_DJ[v.name])
                 end
 
-                if djenabled and istable(chicagoRP_DJ[v.name]) and DJTalking[v.name] == false then
+                if djenabled and istable(chicagoRP_DJ[v.name]) and DJTalking[v.name] == false and NoInterupt[v.name] == false then
                     for _, v3 in ipairs (djTableShuffled[v.name]) do
                         StartPosition[v.name] = SysTime()
                         NextSongTime[v.name] = StartPosition[v.name] + v3.length
@@ -279,7 +280,7 @@ local function table_calculation()
                         break
                     end
                     print("Future DJ StartPosition and NextSongTime set!")
-                elseif !djenabled or !istable(chicagoRP_DJ[v.name]) or DJTalking[v.name] == true then
+                elseif !djenabled or !istable(chicagoRP_DJ[v.name]) or DJTalking[v.name] == true or NoInterupt[v.name] == true then
                     StartPosition[v.name] = SysTime()
                     NextSongTime[v.name] = StartPosition[v.name] + v2.length
                     DJTalking[v.name] = false
