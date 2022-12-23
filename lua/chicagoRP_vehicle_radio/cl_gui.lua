@@ -193,13 +193,20 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
             station:SetVolume(0)
             SONG = station
             station:GetVolume()
-            timer.Simple(0.35, function()
+            if realtimestamp == 0.35 then
                 if IsValid(station) then
-                    station:SetTime(realtimestamp, false) -- fucking desync wtf???
                     station:SetVolume(musicvolume)
                     print(station:GetTime())
                 end
-            end)
+            elseif realtimestamp => 0.35
+                timer.Simple(0.35, function()
+                    if IsValid(station) then
+                        station:SetTime(realtimestamp, false) -- fucking desync wtf???
+                        station:SetVolume(musicvolume)
+                        print(station:GetTime())
+                    end
+                end)
+            end
             -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
         else
             LocalPlayer():ChatPrint("Invalid URL!")
@@ -226,8 +233,6 @@ net.Receive("chicagoRP_vehicleradio_playdjvoiceline", function()
 
     local stationname = net.ReadString()
     local url = net.ReadString()
-    local artist = net.ReadString()
-    local netsongname = net.ReadString()
     local timestamp = net.ReadFloat()
 
     currentStation = stationname
@@ -248,13 +253,20 @@ net.Receive("chicagoRP_vehicleradio_playdjvoiceline", function()
             station:SetVolume(0)
             DJVoiceLine = station
             station:GetVolume()
-            timer.Simple(0.35, function()
+            if realtimestamp == 0.35 then
                 if IsValid(station) then
-                    station:SetTime(realtimestamp, false) -- fucking desync wtf???
                     station:SetVolume(musicvolume)
                     print(station:GetTime())
                 end
-            end)
+            elseif realtimestamp => 0.35
+                timer.Simple(0.35, function()
+                    if IsValid(station) then
+                        station:SetTime(realtimestamp, false) -- fucking desync wtf???
+                        station:SetVolume(musicvolume)
+                        print(station:GetTime())
+                    end
+                end)
+            end
             -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
         else
             LocalPlayer():ChatPrint("Invalid URL!")

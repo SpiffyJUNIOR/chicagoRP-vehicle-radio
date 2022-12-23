@@ -155,7 +155,11 @@ local function PlayDJVoiceline(ply)
 
     print(secondindex)
 
-    timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    if StartPosition[secondindex] - SysTime() != 0 then
+        timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    else
+        timestamp[secondindex] = 0
+    end
 
     -- PrintTable(timestamp)
     -- print(StartPosition[secondindex])
@@ -167,8 +171,6 @@ local function PlayDJVoiceline(ply)
         net.WriteBool(false)
         net.WriteString(secondindex)
         net.WriteString(v2.url)
-        net.WriteString("")
-        net.WriteString("")
         print(timestamp[secondindex])
         net.WriteFloat(timestamp[secondindex])
         net.Send(ply)
@@ -201,7 +203,11 @@ local function PlaySong(ply)
 
     print(secondindex)
 
-    timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    if StartPosition[secondindex] - SysTime() != 0 then
+        timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
+    else
+        timestamp[secondindex] = 0
+    end
 
     -- PrintTable(timestamp)
     -- print(StartPosition[secondindex])
