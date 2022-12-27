@@ -1,4 +1,4 @@
-chicagoRP_DJ = chicagoRP_DJ or {} -- maybe add stormfox 2 and atmos support for specific time of day voicelines
+-- chicagoRP_DJ = chicagoRP_DJ or {} -- maybe add stormfox 2 and atmos support for specific time of day voicelines
 
 chicagoRP.radioplaylists = {
     {
@@ -256,208 +256,208 @@ chicagoRP.vaporwave = {
 }
 
 ----- DJ voicelines (optional)
-chicagoRP_DJ.alternative_metal = {
-    {
-        artist = "Deftones",
-        length = 10, -- 262
-        song = "Be Quiet and Drive (Far Away)",
-        url = "https://files.catbox.moe/8xtxol.mp3"
-    }, {
-        artist = "System of a Down",
-        length = 3, -- 519
-        song = "Toxicity",
-        url = "https://files.catbox.moe/3yizkl.mp3"
-    }
-}
+-- chicagoRP_DJ.alternative_metal = {
+--     {
+--         artist = "Deftones",
+--         length = 10, -- 262
+--         song = "Be Quiet and Drive (Far Away)",
+--         url = "https://files.catbox.moe/8xtxol.mp3"
+--     }, {
+--         artist = "System of a Down",
+--         length = 3, -- 519
+--         song = "Toxicity",
+--         url = "https://files.catbox.moe/3yizkl.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.ambient = {
-    {
-        artist = "Aphex Twin",
-        length = 440, -- 440
-        song = "Blue Calx",
-        url = "https://files.catbox.moe/m6q7g3.mp3"
-    }, {
-        artist = "Aphex Twin",
-        length = 357, -- 357
-        song = "Hexagon",
-        url = "https://files.catbox.moe/a9mgh1.mp3"
-    }, {
-        artist = "Aphex Twin",
-        length = 611, -- 611
-        song = "Stone in Focus",
-        url = "https://files.catbox.moe/w4ih54.mp3"
-    }
-}
+-- chicagoRP_DJ.ambient = {
+--     {
+--         artist = "Aphex Twin",
+--         length = 440, -- 440
+--         song = "Blue Calx",
+--         url = "https://files.catbox.moe/m6q7g3.mp3"
+--     }, {
+--         artist = "Aphex Twin",
+--         length = 357, -- 357
+--         song = "Hexagon",
+--         url = "https://files.catbox.moe/a9mgh1.mp3"
+--     }, {
+--         artist = "Aphex Twin",
+--         length = 611, -- 611
+--         song = "Stone in Focus",
+--         url = "https://files.catbox.moe/w4ih54.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.atmospheric_drum_and_bass = {
-    {
-        artist = "Goldie",
-        length = 1263, -- 440
-        song = "Timeless",
-        url = "https://files.catbox.moe/rk5cu8.mp3"
-    }, {
-        artist = "Jacob's Optical Stairway",
-        length = 301, -- 357
-        song = "The Fusion Formula (The Metamorphosis)",
-        url = "https://files.catbox.moe/b9jsbm.mp3"
-    }, {
-        artist = "Source Direct",
-        length = 483, -- 611
-        song = "Secret Liaison",
-        url = "https://files.catbox.moe/j1t3kp.mp3"
-    }
-}
+-- chicagoRP_DJ.atmospheric_drum_and_bass = {
+--     {
+--         artist = "Goldie",
+--         length = 1263, -- 440
+--         song = "Timeless",
+--         url = "https://files.catbox.moe/rk5cu8.mp3"
+--     }, {
+--         artist = "Jacob's Optical Stairway",
+--         length = 301, -- 357
+--         song = "The Fusion Formula (The Metamorphosis)",
+--         url = "https://files.catbox.moe/b9jsbm.mp3"
+--     }, {
+--         artist = "Source Direct",
+--         length = 483, -- 611
+--         song = "Secret Liaison",
+--         url = "https://files.catbox.moe/j1t3kp.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.avant_garde_jazz = {
-    {
-        artist = "John Zorn",
-        length = 140, -- 262
-        song = "Snagglepuss",
-        url = "https://files.catbox.moe/awpr3e.mp3"
-    }, {
-        artist = "Ornette Coleman",
-        length = 302, -- 519
-        song = "Lonely Woman",
-        url = "https://files.catbox.moe/oemhyj.mp3"
-    }
-}
+-- chicagoRP_DJ.avant_garde_jazz = {
+--     {
+--         artist = "John Zorn",
+--         length = 140, -- 262
+--         song = "Snagglepuss",
+--         url = "https://files.catbox.moe/awpr3e.mp3"
+--     }, {
+--         artist = "Ornette Coleman",
+--         length = 302, -- 519
+--         song = "Lonely Woman",
+--         url = "https://files.catbox.moe/oemhyj.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.cringe = {
-    {
-        artist = "Death",
-        length = 380, -- 262
-        song = "Leprosy",
-        url = "https://files.catbox.moe/dml982.mp3"
-    }, {
-        artist = "Morbid Angel",
-        length = 243, -- 519
-        song = "Immortal Rites",
-        url = "https://files.catbox.moe/51kerc.mp3"
-    }
-}
+-- chicagoRP_DJ.cringe = {
+--     {
+--         artist = "Death",
+--         length = 380, -- 262
+--         song = "Leprosy",
+--         url = "https://files.catbox.moe/dml982.mp3"
+--     }, {
+--         artist = "Morbid Angel",
+--         length = 243, -- 519
+--         song = "Immortal Rites",
+--         url = "https://files.catbox.moe/51kerc.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.death_metal = {
-    {
-        artist = "Death",
-        length = 380, -- 262
-        song = "Leprosy",
-        url = "https://files.catbox.moe/dml982.mp3"
-    }, {
-        artist = "Morbid Angel",
-        length = 243, -- 519
-        song = "Immortal Rites",
-        url = "https://files.catbox.moe/51kerc.mp3"
-    }
-}
+-- chicagoRP_DJ.death_metal = {
+--     {
+--         artist = "Death",
+--         length = 380, -- 262
+--         song = "Leprosy",
+--         url = "https://files.catbox.moe/dml982.mp3"
+--     }, {
+--         artist = "Morbid Angel",
+--         length = 243, -- 519
+--         song = "Immortal Rites",
+--         url = "https://files.catbox.moe/51kerc.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.detroit_techno = {
-    {
-        artist = "Drexciya",
-        length = 319, -- 262
-        song = "Habitat 'O' Negative",
-        url = "https://files.catbox.moe/d0cgov.mp3"
-    }, {
-        artist = "Galaxy 2 Galaxy",
-        length = 255, -- 519
-        song = "Hi-Tech Jazz (The Elements)",
-        url = "https://files.catbox.moe/mrta9h.mp3"
-    }, {
-        artist = "World 2 World",
-        length = 267, -- 519
-        song = "Jupiter Jazz",
-        url = "https://files.catbox.moe/s3x81v.mp3"
-    }
-}
+-- chicagoRP_DJ.detroit_techno = {
+--     {
+--         artist = "Drexciya",
+--         length = 319, -- 262
+--         song = "Habitat 'O' Negative",
+--         url = "https://files.catbox.moe/d0cgov.mp3"
+--     }, {
+--         artist = "Galaxy 2 Galaxy",
+--         length = 255, -- 519
+--         song = "Hi-Tech Jazz (The Elements)",
+--         url = "https://files.catbox.moe/mrta9h.mp3"
+--     }, {
+--         artist = "World 2 World",
+--         length = 267, -- 519
+--         song = "Jupiter Jazz",
+--         url = "https://files.catbox.moe/s3x81v.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.idm = {
-    {
-        artist = "Flying Lotus",
-        length = 262, -- 262
-        song = "Do the Astral Plane",
-        url = "https://files.catbox.moe/sduxdr.mp3"
-    }, {
-        artist = "Autechre",
-        length = 519, -- 519
-        song = "Acroyear2",
-        url = "https://files.catbox.moe/s6xq61.mp3"
-    }
-}
+-- chicagoRP_DJ.idm = {
+--     {
+--         artist = "Flying Lotus",
+--         length = 262, -- 262
+--         song = "Do the Astral Plane",
+--         url = "https://files.catbox.moe/sduxdr.mp3"
+--     }, {
+--         artist = "Autechre",
+--         length = 519, -- 519
+--         song = "Acroyear2",
+--         url = "https://files.catbox.moe/s6xq61.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.industrial_metal = {
-    {
-        artist = "Strapping Young Lad",
-        length = 337, -- 337
-        song = "Detox",
-        url = "https://files.catbox.moe/4vhe6k.mp3"
-    }, {
-        artist = "Strapping Young Lad",
-        length = 343, -- 343
-        song = "Love?",
-        url = "https://files.catbox.moe/1wzdc4.mp3"
-    }, {
-        artist = "Strapping Young Lad",
-        length = 402, -- 402
-        song = "Skeksis",
-        url = "https://files.catbox.moe/zu9jfn.mp3"
-    }
-}
+-- chicagoRP_DJ.industrial_metal = {
+--     {
+--         artist = "Strapping Young Lad",
+--         length = 337, -- 337
+--         song = "Detox",
+--         url = "https://files.catbox.moe/4vhe6k.mp3"
+--     }, {
+--         artist = "Strapping Young Lad",
+--         length = 343, -- 343
+--         song = "Love?",
+--         url = "https://files.catbox.moe/1wzdc4.mp3"
+--     }, {
+--         artist = "Strapping Young Lad",
+--         length = 402, -- 402
+--         song = "Skeksis",
+--         url = "https://files.catbox.moe/zu9jfn.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.new_wave = {
-    {
-        artist = "David Bowie",
-        chance = 87,
-        length = 456, -- 456
-        song = "Let's Dance",
-        url = "https://files.catbox.moe/txe0bk.mp3"
-    }, {
-        artist = "New Order",
-        length = 356, -- 356
-        song = "Your Slient Face",
-        url = "https://files.catbox.moe/80hgkv.mp3"
-    }, {
-        artist = "Talking Heads",
-        length = 349, -- 349
-        song = "Born Under Punches (The Heat Goes On)",
-        url = "https://files.catbox.moe/4rfuv4.mp3"
-    }
-}
+-- chicagoRP_DJ.new_wave = {
+--     {
+--         artist = "David Bowie",
+--         chance = 87,
+--         length = 456, -- 456
+--         song = "Let's Dance",
+--         url = "https://files.catbox.moe/txe0bk.mp3"
+--     }, {
+--         artist = "New Order",
+--         length = 356, -- 356
+--         song = "Your Slient Face",
+--         url = "https://files.catbox.moe/80hgkv.mp3"
+--     }, {
+--         artist = "Talking Heads",
+--         length = 349, -- 349
+--         song = "Born Under Punches (The Heat Goes On)",
+--         url = "https://files.catbox.moe/4rfuv4.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.synthpop = {
-    {
-        artist = "Depeche Mode",
-        length = 372, -- 262
-        song = "Enjoy the Silence",
-        url = "https://files.catbox.moe/x1ncso.mp3"
-    }, {
-        artist = "MGMT",
-        length = 261, -- 519
-        song = "Time to Pretend",
-        url = "https://files.catbox.moe/zr32zq.mp3"
-    }
-}
+-- chicagoRP_DJ.synthpop = {
+--     {
+--         artist = "Depeche Mode",
+--         length = 372, -- 262
+--         song = "Enjoy the Silence",
+--         url = "https://files.catbox.moe/x1ncso.mp3"
+--     }, {
+--         artist = "MGMT",
+--         length = 261, -- 519
+--         song = "Time to Pretend",
+--         url = "https://files.catbox.moe/zr32zq.mp3"
+--     }
+-- }
 
-chicagoRP_DJ.vaporwave = {
-    {
-        artist = "Macintosh Plus",
-        length = 372, -- 262
-        song = "420 hiragana title",
-        url = "https://files.catbox.moe/x1ncso.mp3"
-    }, {
-        artist = "death's dynamic shroud",
-        length = 261, -- 519
-        song = "I'll Try Living Like This",
-        url = "https://files.catbox.moe/zr32zq.mp3"
-    }, {
-        artist = "Oneothrix Point Never",
-        chance = 20,
-        length = 261, -- 519
-        song = "END OF LIFE ENTERTAINMENT SCENARIO",
-        url = "https://files.catbox.moe/zr32zq.mp3"
-    }, {
-        chance = 50,
-        playlist = "eccojams_vol1" -- add eccojams lol
-    }
-}
+-- chicagoRP_DJ.vaporwave = {
+--     {
+--         artist = "Macintosh Plus",
+--         length = 372, -- 262
+--         song = "420 hiragana title",
+--         url = "https://files.catbox.moe/x1ncso.mp3"
+--     }, {
+--         artist = "death's dynamic shroud",
+--         length = 261, -- 519
+--         song = "I'll Try Living Like This",
+--         url = "https://files.catbox.moe/zr32zq.mp3"
+--     }, {
+--         artist = "Oneothrix Point Never",
+--         chance = 20,
+--         length = 261, -- 519
+--         song = "END OF LIFE ENTERTAINMENT SCENARIO",
+--         url = "https://files.catbox.moe/zr32zq.mp3"
+--     }, {
+--         chance = 50,
+--         playlist = "eccojams_vol1" -- add eccojams lol
+--     }
+-- }
 
 ----- albums (random chance to be inserted)
 

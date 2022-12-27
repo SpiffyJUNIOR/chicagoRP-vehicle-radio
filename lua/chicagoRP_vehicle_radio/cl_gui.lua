@@ -3,7 +3,7 @@ local OpenMotherFrame = nil
 local currentStation = nil
 local currentStationPrintName = nil
 SONG = SONG or nil
-DJVoiceLine = DJVoiceLine or nil
+-- DJVoiceLine = DJVoiceLine or nil
 local stationname = nil
 local artistname = nil
 local songname = nil
@@ -214,65 +214,65 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     end)
 end)
 
-net.Receive("chicagoRP_vehicleradio_playdjvoiceline", function()
-    local ply = LocalPlayer()
-    print("PlayDJVoiceline Net received!")
+-- net.Receive("chicagoRP_vehicleradio_playdjvoiceline", function()
+--     local ply = LocalPlayer()
+--     print("PlayDJVoiceline Net received!")
 
-    if !IsValid(ply) then return end
-    -- if !IsValid(ply:GetVehicle()) then return end -- broken for some stupid reason
-    -- if !ply:InVehicle() then return end -- broken for some stupid reason
-    if !enabled then return end
+--     if !IsValid(ply) then return end
+--     -- if !IsValid(ply:GetVehicle()) then return end -- broken for some stupid reason
+--     -- if !ply:InVehicle() then return end -- broken for some stupid reason
+--     if !enabled then return end
 
-    local stopsong = net.ReadBool()
+--     local stopsong = net.ReadBool()
 
-    if DJVoiceLine then
-        DJVoiceLine:Stop()
-    end
+--     if DJVoiceLine then
+--         DJVoiceLine:Stop()
+--     end
 
-    if stopsong == true then return end
+--     if stopsong == true then return end
 
-    local stationname = net.ReadString()
-    local url = net.ReadString()
-    local timestamp = net.ReadFloat()
+--     local stationname = net.ReadString()
+--     local url = net.ReadString()
+--     local timestamp = net.ReadFloat()
 
-    currentStation = stationname
-    print(currentStation)
+--     currentStation = stationname
+--     print(currentStation)
 
-    print("Song: " .. artist .. " - " .. netsongname)
-    print("TimeStamp: " .. timestamp)
+--     print("Song: " .. artist .. " - " .. netsongname)
+--     print("TimeStamp: " .. timestamp)
 
-    local realtimestamp = math.Round(timestamp, 2) + 0.35
-    local musicvolume = GetConVar("cl_chicagoRP_vehicleradio_volume"):GetFloat()
+--     local realtimestamp = math.Round(timestamp, 2) + 0.35
+--     local musicvolume = GetConVar("cl_chicagoRP_vehicleradio_volume"):GetFloat()
 
-    print(realtimestamp)
+--     print(realtimestamp)
 
-    -- local g_station = nil
-    sound.PlayURL(url, "noblock", function(station)
-        if (IsValid(station)) then
-            station:Play()
-            station:SetVolume(0)
-            DJVoiceLine = station
-            station:GetVolume()
-            if realtimestamp == 0.35 then
-                if IsValid(station) then
-                    station:SetVolume(musicvolume)
-                    print(station:GetTime())
-                end
-            elseif realtimestamp => 0.35
-                timer.Simple(0.35, function()
-                    if IsValid(station) then
-                        station:SetTime(realtimestamp, false) -- fucking desync wtf???
-                        station:SetVolume(musicvolume)
-                        print(station:GetTime())
-                    end
-                end)
-            end
-            -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
-        else
-            LocalPlayer():ChatPrint("Invalid URL!")
-        end
-    end)
-end)
+--     -- local g_station = nil
+--     sound.PlayURL(url, "noblock", function(station)
+--         if (IsValid(station)) then
+--             station:Play()
+--             station:SetVolume(0)
+--             DJVoiceLine = station
+--             station:GetVolume()
+--             if realtimestamp == 0.35 then
+--                 if IsValid(station) then
+--                     station:SetVolume(musicvolume)
+--                     print(station:GetTime())
+--                 end
+--             elseif realtimestamp => 0.35
+--                 timer.Simple(0.35, function()
+--                     if IsValid(station) then
+--                         station:SetTime(realtimestamp, false) -- fucking desync wtf???
+--                         station:SetVolume(musicvolume)
+--                         print(station:GetTime())
+--                     end
+--                 end)
+--             end
+--             -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
+--         else
+--             LocalPlayer():ChatPrint("Invalid URL!")
+--         end
+--     end)
+-- end)
 
 local function StopSong()
     local ply = LocalPlayer()
@@ -287,9 +287,9 @@ local function StopSong()
         SONG:Stop()
     end
 
-    if DJVoiceLine then
-        DJVoiceLine:Stop()
-    end
+    -- if DJVoiceLine then
+    --     DJVoiceLine:Stop()
+    -- end
 
     currentStation = nil
     stationname = nil
@@ -881,11 +881,10 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 -- make icons transparent when not hovered (test)
 -- make radio open button hold open (test)
 -- add random chance of album being inserted (test)
--- add DJ/commerical support (test)
--- make timer.Simple only run if timestamp is < 0.35
+-- make timer.Simple only run if timestamp is < 0.35 (test)
 -- add radio wheel hover like GTA 5 (idk how to hover something based off radius, maybe try limiting where mouse can go?)
 -- make layout pos and size match GTA 5's
-
+-- add DJ/commerical support (delayed until everything else is finished)
 
 
 
