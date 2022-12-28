@@ -3,7 +3,6 @@ util.AddNetworkString("chicagoRP_vehicleradio_sendinfo")
 util.AddNetworkString("chicagoRP_vehicleradio_receiveinfo")
 util.AddNetworkString("chicagoRP_vehicleradio_receiveindex")
 util.AddNetworkString("chicagoRP_vehicleradio_playsong")
-util.AddNetworkString("chicagoRP_vehicleradio_playdjvoiceline")
 util.AddNetworkString("chicagoRP_vehicleradio_stopsong")
 
 local StartPosition = StartPosition or {}
@@ -30,7 +29,7 @@ local function GetRealVehicle(vehicle, ply)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
+    if simfphys or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
            return ply:GetVehicle():GetParent()
         elseif SVMOD and SVMOD:IsVehicle(vehicle) then
@@ -72,7 +71,7 @@ local function GetPassengerTable(vehicle, ply)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") and IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then -- no GetSimfphysState function so we do convar check
+    if simfphys and IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then -- no GetSimfphysState function so we do convar check
         print("simfphys vehicle")
         return GetSimfphysPassengers(vehicle, ply)
     elseif SVMOD and SVMOD:GetAddonState() == true and SVMOD:IsVehicle(vehicle) then
@@ -116,7 +115,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
                 if numbergen => v2.chance then
                     if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
                         for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                            table.insert(music_left[v.name], 1)
+                            table.insert(music_left[v.name], 1) -- replace with CopyFromTo but copy to start of table (this NEEDS to be done)
                         end
                     end
                 elseif numbergen < v2.chance
@@ -143,54 +142,6 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
         end
     end
 end
-
--- local function PlayDJVoiceline(ply)
---     -- print("PlayDJVoiceline ran!")
-
---     local vehicle = ply:GetVehicle()
---     local actualvehicle = GetRealVehicle(vehicle, ply)
---     local secondindex = actualvehicle:GetNW2String("currentstation")
-
---     if secondindex == nil or !scriptenabled or !djenabled then return end
-
---     print(secondindex)
-
---     if StartPosition[secondindex] - SysTime() != 0 then
---         timestamp[secondindex] = math.abs(StartPosition[secondindex] - SysTime())
---     else
---         timestamp[secondindex] = 0
---     end
-
---     -- PrintTable(timestamp)
---     -- print(StartPosition[secondindex])
-
---     -- PrintTable(music_left[secondindex])
-
---     for _, v2 in ipairs(chicagoRP_DJ[secondindex]) do
---         net.Start("chicagoRP_vehicleradio_playdjvoiceline")
---         net.WriteBool(false)
---         net.WriteString(secondindex)
---         net.WriteString(v2.url)
---         print(timestamp[secondindex])
---         net.WriteFloat(timestamp[secondindex])
---         net.Send(ply)
-
---         print("PlayDJVoiceline Net sent!")
-
---         break
---     end
-
---     -- if debugmode == true then
---     --     for _, v in ipairs(music_left[secondindex]) do
---     --         print(("CURRENT SONG: %s"):format(v.artist .. " - " .. v.song))
---     --         print(("SONG DURATION: %s"):format(string.ToMinutesSeconds(v.length)))
-
---     --         break
---     --     end
-
---     --     -- PrintTable(music_left)
---     -- end
--- end
 
 local function PlaySong(ply)
     -- print("PlaySong ran!")
@@ -270,28 +221,7 @@ local function table_calculation()
                     end
                 end
 
-                -- local djTableShuffled = djTableShuffled or {}
-
-                -- if djenabled and istable(chicagoRP_DJ[v.name]) then
-                --     djTableShuffled[v.name] = table.Shuffle(chicagoRP_DJ[v.name])
-                -- end
-
-                -- if djenabled and istable(chicagoRP_DJ[v.name]) and DJTalking[v.name] == false and NoInterupt[v.name] == false then
-                --     for _, v3 in ipairs (djTableShuffled[v.name]) do
-                --         StartPosition[v.name] = SysTime()
-                --         NextSongTime[v.name] = StartPosition[v.name] + v3.length
-
-                --         DJTalking[v.name] = true
-
-                --         break
-                --     end
-                --     print("Future DJ StartPosition and NextSongTime set!")
-                -- elseif !djenabled or !istable(chicagoRP_DJ[v.name]) or DJTalking[v.name] == true or NoInterupt[v.name] == true then -- elseif !djenabled or !istable(chicagoRP_DJ[v.name]) or DJTalking[v.name] == true or NoInterupt[v.name] == true then
-                --     StartPosition[v.name] = SysTime()
-                --     NextSongTime[v.name] = StartPosition[v.name] + v2.length
-                --     -- DJTalking[v.name] = false
-                --     print("Future Song StartPosition and NextSongTime set!")
-                -- end
+                -- instead of doing entire seperate functions and operations for DJ: shuffle DJ table, loop through it, and do table.insert into music_left then break end
 
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length

@@ -3,7 +3,6 @@ local OpenMotherFrame = nil
 local currentStation = nil
 local currentStationPrintName = nil
 SONG = SONG or nil
--- DJVoiceLine = DJVoiceLine or nil
 local stationname = nil
 local artistname = nil
 local songname = nil
@@ -63,7 +62,7 @@ local function GetRealVehicle(vehicle)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
+    if simfphys or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
            return ply:GetVehicle():GetParent()
         elseif SVMOD and SVMOD:IsVehicle(vehicle) then
@@ -103,7 +102,7 @@ local function GetPassengerTable(vehicle, ply)
     if !IsValid(vehicle) then return end
     if !ply:InVehicle() then return end
 
-    if ConVarExists("sv_simfphys_enabledamage") and IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then -- no GetSimfphysState function so we do convar check
+    if simfphys and IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then -- no GetSimfphysState function so we do convar check
         print("simfphys vehicle")
         return GetSimfphysPassengers(vehicle, ply)
     elseif SVMOD and SVMOD:GetAddonState() == true and SVMOD:IsVehicle(vehicle) then
@@ -122,7 +121,7 @@ local function IsDriver(vehicle, ply)
 
     local driver = false
 
-    if ConVarExists("sv_simfphys_enabledamage") or SVMOD:GetAddonState() == true then
+    if simfphys or SVMOD:GetAddonState() == true then
         if IsValid(ply:GetSimfphys()) and IsValid(ply:GetVehicle():GetParent()) then
             driver = ply:IsDrivingSimfphys()
             if driver == true then
@@ -214,66 +213,6 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     end)
 end)
 
--- net.Receive("chicagoRP_vehicleradio_playdjvoiceline", function()
---     local ply = LocalPlayer()
---     print("PlayDJVoiceline Net received!")
-
---     if !IsValid(ply) then return end
---     -- if !IsValid(ply:GetVehicle()) then return end -- broken for some stupid reason
---     -- if !ply:InVehicle() then return end -- broken for some stupid reason
---     if !enabled then return end
-
---     local stopsong = net.ReadBool()
-
---     if DJVoiceLine then
---         DJVoiceLine:Stop()
---     end
-
---     if stopsong == true then return end
-
---     local stationname = net.ReadString()
---     local url = net.ReadString()
---     local timestamp = net.ReadFloat()
-
---     currentStation = stationname
---     print(currentStation)
-
---     print("Song: " .. artist .. " - " .. netsongname)
---     print("TimeStamp: " .. timestamp)
-
---     local realtimestamp = math.Round(timestamp, 2) + 0.35
---     local musicvolume = GetConVar("cl_chicagoRP_vehicleradio_volume"):GetFloat()
-
---     print(realtimestamp)
-
---     -- local g_station = nil
---     sound.PlayURL(url, "noblock", function(station)
---         if (IsValid(station)) then
---             station:Play()
---             station:SetVolume(0)
---             DJVoiceLine = station
---             station:GetVolume()
---             if realtimestamp == 0.35 then
---                 if IsValid(station) then
---                     station:SetVolume(musicvolume)
---                     print(station:GetTime())
---                 end
---             elseif realtimestamp => 0.35
---                 timer.Simple(0.35, function()
---                     if IsValid(station) then
---                         station:SetTime(realtimestamp, false) -- fucking desync wtf???
---                         station:SetVolume(musicvolume)
---                         print(station:GetTime())
---                     end
---                 end)
---             end
---             -- g_station = station -- keep a reference to the audio object, so it doesn't get garbage collected which will stop the sound (garryism moment)
---         else
---             LocalPlayer():ChatPrint("Invalid URL!")
---         end
---     end)
--- end)
-
 local function StopSong()
     local ply = LocalPlayer()
     if !IsValid(ply) then return end
@@ -286,10 +225,6 @@ local function StopSong()
     if SONG then
         SONG:Stop()
     end
-
-    -- if DJVoiceLine then
-    --     DJVoiceLine:Stop()
-    -- end
 
     currentStation = nil
     stationname = nil
