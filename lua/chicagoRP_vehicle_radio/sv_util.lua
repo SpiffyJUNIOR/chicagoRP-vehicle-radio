@@ -8,6 +8,9 @@ util.AddNetworkString("chicagoRP_vehicleradio_stopsong")
 local StartPosition = StartPosition or {}
 local NextSongTime = NextSongTime or {}
 local timestamp = timestamp or {}
+-- local LastSongArtist = LastSongArtist or {}
+-- local LastSongName = LastSongName or {}
+
 -- local DJTalking = DJTalking or {}
 -- local NoInterupt = NoInterupt or {}
 
@@ -111,14 +114,12 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
         for _, v2 in ipairs (music_left[v.name]) do
             local numbergen = math.random(0, 100)
 
-            if !isempty(v2.chance) then
-                if numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                    for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                        table.insert(music_left[v.name], 1, "weneedallvalueshere") -- replace with CopyFromTo but copy to start of table (this NEEDS to be done)
-                    end
-                else
-                    table.remove(music_left[v.name], 1)
+            if !isempty(v2.chance) and numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
+                    table.insert(music_left[v.name], k, v)
                 end
+            elseif (numbergen =< v2.chance) or isempty(v2.chance) then
+                table.remove(music_left[v.name], 1)
             end
 
             break -- if nobody got me i know break got me :pray:
@@ -196,26 +197,38 @@ local function table_calculation()
 
     for _, v in ipairs(chicagoRP.radioplaylists) do
         if NextSongTime[v.name] <= SysTime() + 2 and !table.IsEmpty(music_left[v.name]) then
-            table.remove(music_left[v.name], 1)
+            -- table.remove(music_left[v.name], 1)
 
-            -- DJTalking[v.name] = false
-            -- NoInterupt[v.name] = false
+            -- local LastSongArtist[v.name] = nil
+            -- local LastSongName[v.name] = nil
 
             for _, v2 in ipairs (music_left[v.name]) do
                 local numbergen = math.random(0, 100)
 
-                if !isempty(v2.chance) then
-                    if (numbergen >= v2.chance) and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                        for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                            table.insert(music_left[v.name], 1)
-                        end
-                        --     NoInterupt[v.name] = true
-                        -- else
-                        --     NoInterupt[v.name] = false
-                    else
-                        table.remove(music_left[v.name], 1)
+                LastSongArtist[v.name] = v2.artist
+                LastSongName[v.name] = v2.song
+
+                if !isempty(v2.chance) and (numbergen >= v2.chance) and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                    for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
+                        table.insert(music_left[v.name], k, v)
+                        -- NoInterupt[v.name] = true
+                        -- DJTalking[v.name] = false
                     end
+                elseif (numbergen =< v2.chance) or isempty(v2.chance) then
+                    table.remove(music_left[v.name], 1)
+                    -- NoInterupt[v.name] = false
+                    -- DJTalking[v.name] = true
                 end
+
+                -- local djtable = table.Shuffle(chicagoRP_DJ[v.name])
+
+                -- for _, v5 in ipairs(djtable) do
+                --     if DJTalking[v.name] = false and NoInterupt[v.name] = false and LastSongArtist[v.name] == v5.artist and LastSongName[v.name] == v5.song then
+                --         table.insert(music_left[v.name], 1, v) -- hell
+
+                --         break
+                --     end
+                -- end
 
                 -- instead of doing entire seperate functions and operations for DJ: shuffle DJ table, loop through it, and do table.insert into music_left then break end
 
@@ -237,12 +250,6 @@ local function table_calculation()
                         print("Song played after previous ended")
 
                         PlaySong(v4)
-
-                        -- if DJTalking[v.name] == false then
-                        --     PlaySong(v4)
-                        -- elseif DJTalking[v.name] == true then
-                        --     PlayDJVoiceline(v4)
-                        -- end
                     end
                 end
 
@@ -261,14 +268,14 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 local numbergen = math.random(0, 100)
 
-                if !isempty(v2.chance) then
-                    if numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                        for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                            table.insert(music_left[v.name], 1)
-                        end
-                    else
-                        table.remove(music_left[v.name], 1)
+                if !isempty(v2.chance) and numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                    for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
+                        table.insert(music_left[v.name], k, v)
+                        -- NoInterupt[v.name] = true
                     end
+                elseif (numbergen =< v2.chance) or isempty(v2.chance) then
+                    table.remove(music_left[v.name], 1)
+                    -- NoInterupt[v.name] = false
                 end
 
                 StartPosition[v.name] = SysTime()
