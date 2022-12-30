@@ -112,13 +112,11 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
             local numbergen = math.random(0, 100)
 
             if !isempty(v2.chance) then
-                if numbergen => v2.chance then
-                    if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                        for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                            table.insert(music_left[v.name], 1) -- replace with CopyFromTo but copy to start of table (this NEEDS to be done)
-                        end
+                if numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                    for _, v3 in ipairs (chicagoRP[v2.playlist]) do
+                        table.insert(music_left[v.name], 1, "weneedallvalueshere") -- replace with CopyFromTo but copy to start of table (this NEEDS to be done)
                     end
-                elseif numbergen < v2.chance
+                else
                     table.remove(music_left[v.name], 1)
                 end
             end
@@ -207,16 +205,14 @@ local function table_calculation()
                 local numbergen = math.random(0, 100)
 
                 if !isempty(v2.chance) then
-                    if numbergen => v2.chance then
-                        if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                            for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                                table.insert(music_left[v.name], 1)
-                            end
+                    if (numbergen >= v2.chance) and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                        for _, v3 in ipairs (chicagoRP[v2.playlist]) do
+                            table.insert(music_left[v.name], 1)
+                        end
                         --     NoInterupt[v.name] = true
                         -- else
                         --     NoInterupt[v.name] = false
-                        end
-                    elseif numbergen < v2.chance
+                    else
                         table.remove(music_left[v.name], 1)
                     end
                 end
@@ -266,17 +262,15 @@ local function table_calculation()
                 local numbergen = math.random(0, 100)
 
                 if !isempty(v2.chance) then
-                    if numbergen => v2.chance then
-                        if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                            for _, v3 in ipairs (chicagoRP[v2.playlist]) do
-                                table.insert(music_left[v.name], 1)
-                            end
+                    if numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                        for _, v3 in ipairs (chicagoRP[v2.playlist]) do
+                            table.insert(music_left[v.name], 1)
                         end
-                    elseif numbergen < v2.chance
+                    else
                         table.remove(music_left[v.name], 1)
                     end
                 end
-                
+
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
                 print("Regenerated StartPosition and NextSongTime set!")
