@@ -103,7 +103,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 
         print("Source table generated!")
 
-        PrintTable(music_list)
+        -- PrintTable(music_list)
     end
 
     if !IsValid(music_left[v.name]) or table.IsEmpty(music_left[v.name]) then
@@ -111,27 +111,75 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 
         music_left[v.name] = table.Copy(music_list[v.name])
 
-        for _, v2 in ipairs (music_left[v.name]) do
+        table.Shuffle(music_left[v.name])
+
+        for k1, v2 in ipairs (music_left[v.name]) do -- can we do this without indexing k pls
             local numbergen = math.random(0, 100)
+            local count = nil
 
             if !isempty(v2.chance) and numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                print(v2.playlist)
+                print("SPY SPYSPYSP YSPYYSPPYSPYSPYSDAHGJFAUGGTEYWRDVHQABWERFNGAEYJHFBKSJGAEBSFDN ")
                 for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
-                    table.insert(music_left[v.name], k, v)
+                    -- table.remove(music_left[v.name], k1)
+                    -- print(k1)
+                    table.insert(music_left[v.name], k, v3)
+                    print("PLAYLIST TABLE INSERTED")
                 end
-            elseif (numbergen =< v2.chance) or isempty(v2.chance) then
-                table.remove(music_left[v.name], 1)
+            elseif (isempty(v2.chance) and isempty(v2.playlist) and !isempty(v2.song)) or (numbergen <= v2.chance) then
+                table.remove(music_left[v.name], k1)
+                print("elseif song removed")
+            end
+
+            print(!isempty(v2.chance) and !isempty(v2.playlist))
+            print(v2.song)
+            print(v2.chance)
+            print(v2.playlist)
+            print(isnumber(v2.chance))
+            print(isstring(v2.playlist))
+
+            if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                count = #chicagoRP[v2.playlist]
+            end
+
+            if isnumber(v2.chance) and isstring(v2.playlist) then -- working, but doesn't remove the playlist
+                print("removed that fucking cunt piece of shit playlist")
+                PrintTable(music_left[v.name])
+                table.remove(music_left[v.name], count + 1)
+                PrintTable(music_left[v.name])
+                print(k1)
             end
 
             break -- if nobody got me i know break got me :pray:
         end
 
-        table.Shuffle(music_left[v.name])
+        -- for k1, v4 in ipairs (music_left[v.name]) do -- can we do this without indexing k pls
+        --     print(v4.song)
+        --     print(isnumber(v4.chance))
+        --     print(v4chance)
+        --     print(isempty(v4.song))
+        --     print(isstring(v4.playlist))
+        --     if isnumber(v4.chance) and isempty(v4.song) then
+        --         print("removed that fucking cunt piece of shit playlist")
+        --         table.remove(music_left[v.name], k1)
+        --         print(k1)
+        --     end
+
+        --     break -- if nobody got me i know break got me :pray:
+        -- end
 
         print("music_left table generated!")
 
-        for _, v2 in ipairs (music_left[v.name]) do
+        for _, v3 in ipairs (music_left[v.name]) do
+            -- print(v3.playlist)
+            -- print("Playlist^^^")
+            -- print(v3.length)
+            -- print("Length^^^")
             StartPosition[v.name] = SysTime()
-            NextSongTime[v.name] = StartPosition[v.name] + v2.length
+            -- print(v3.chance)
+            -- print(v3.song)
+            PrintTable(v3)
+            NextSongTime[v.name] = StartPosition[v.name] + v3.length
             print("Inital StartPosition and NextSongTime set!")
 
             -- DJTalking[v.name] = false
@@ -205,8 +253,8 @@ local function table_calculation()
             for _, v2 in ipairs (music_left[v.name]) do
                 local numbergen = math.random(0, 100)
 
-                LastSongArtist[v.name] = v2.artist
-                LastSongName[v.name] = v2.song
+                -- LastSongArtist[v.name] = v2.artist
+                -- LastSongName[v.name] = v2.song
 
                 if !isempty(v2.chance) and (numbergen >= v2.chance) and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
                     for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
@@ -214,7 +262,7 @@ local function table_calculation()
                         -- NoInterupt[v.name] = true
                         -- DJTalking[v.name] = false
                     end
-                elseif (numbergen =< v2.chance) or isempty(v2.chance) then
+                elseif isempty(v2.chance) or (numbergen <= v2.chance) then -- how do stop this from comparing with nil???
                     table.remove(music_left[v.name], 1)
                     -- NoInterupt[v.name] = false
                     -- DJTalking[v.name] = true
@@ -273,7 +321,7 @@ local function table_calculation()
                         table.insert(music_left[v.name], k, v)
                         -- NoInterupt[v.name] = true
                     end
-                elseif (numbergen =< v2.chance) or isempty(v2.chance) then
+                elseif isempty(v2.chance) or (numbergen <= v2.chance) then
                     table.remove(music_left[v.name], 1)
                     -- NoInterupt[v.name] = false
                 end

@@ -255,6 +255,144 @@ chicagoRP.vaporwave = {
     }
 }
 
+-- before table.remove
+-- 1:
+--         artist  =   Chuck Person
+--         length  =   372
+--         song    =   A1
+--         url =   https://files.catbox.moe/x1ncso.mp3
+-- 2:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A2
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 3:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A3
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 4:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A4
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 5:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A5
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 6:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B1
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 7:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B2
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 8:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B3
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 9:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B4
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 10:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B5
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 11:
+--         chance  =   50
+--         playlist    =   eccojams_vol1
+-- 12:
+--         artist  =   death's dynamic shroud
+--         length  =   261
+--         song    =   I'll Try Living Like This
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 13:
+--         artist  =   Oneothrix Point Never
+--         chance  =   20
+--         length  =   261
+--         song    =   END OF LIFE ENTERTAINMENT SCENARIO
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 14:
+--         artist  =   Macintosh Plus
+--         length  =   372
+--         song    =   420 hiragana title
+
+-- after table.remove
+-- 1:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A2
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 2:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A3
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 3:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A4
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 4:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   A5
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 5:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B1
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 6:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B2
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 7:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B3
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 8:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B4
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 9:
+--         artist  =   Chuck Person
+--         length  =   261
+--         song    =   B5
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 10:
+--         chance  =   50
+--         playlist    =   eccojams_vol1
+-- 11:
+--         artist  =   death's dynamic shroud
+--         length  =   261
+--         song    =   I'll Try Living Like This
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 12:
+--         artist  =   Oneothrix Point Never
+--         chance  =   20
+--         length  =   261
+--         song    =   END OF LIFE ENTERTAINMENT SCENARIO
+--         url =   https://files.catbox.moe/zr32zq.mp3
+-- 13:
+--         artist  =   Macintosh Plus
+--         length  =   372
+--         song    =   420 hiragana title
+--         url =   https://files.catbox.moe/x1ncso.mp3
+-- 1
+
+
 ----- DJ voicelines (optional)
 -- chicagoRP_DJ.alternative_metal = {
 --     {
