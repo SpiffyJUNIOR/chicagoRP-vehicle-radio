@@ -305,7 +305,7 @@ local function table_calculation()
     end
 end
 
-net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
+net.Receive("chicagoRP_vehicleradio_receiveindex", function(_, ply)
     -- if !IsValid(ply) then return end
     -- if !IsValid(ply:GetVehicle()) then return end
     -- if !ply:InVehicle() then return end
@@ -352,7 +352,7 @@ net.Receive("chicagoRP_vehicleradio_receiveindex", function(len, ply)
     -- print("station name received!")
 end)
 
-net.Receive("chicagoRP_vehicleradio_sendinfo", function(len, ply)
+net.Receive("chicagoRP_vehicleradio_sendinfo", function(_, ply)
     -- print("fetchinfo received!")
 
     local station = net.ReadString()
