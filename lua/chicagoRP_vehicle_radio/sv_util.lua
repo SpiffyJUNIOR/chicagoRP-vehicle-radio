@@ -150,6 +150,11 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
                 print(k1)
             end
 
+            PrintTable(v2)
+            StartPosition[v.name] = SysTime()
+            NextSongTime[v.name] = StartPosition[v.name] + v2.length
+            print("Inital StartPosition and NextSongTime set!")
+
             break -- if nobody got me i know break got me :pray:
         end
 
@@ -169,24 +174,6 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
         -- end
 
         print("music_left table generated!")
-
-        for _, v3 in ipairs (music_left[v.name]) do
-            -- print(v3.playlist)
-            -- print("Playlist^^^")
-            -- print(v3.length)
-            -- print("Length^^^")
-            StartPosition[v.name] = SysTime()
-            -- print(v3.chance)
-            -- print(v3.song)
-            PrintTable(v3)
-            NextSongTime[v.name] = StartPosition[v.name] + v3.length
-            print("Inital StartPosition and NextSongTime set!")
-
-            -- DJTalking[v.name] = false
-            -- NoInterupt[v.name] = false
-
-            break
-        end
     end
 end
 
@@ -243,7 +230,7 @@ end
 local function table_calculation()
     if !scriptenabled then return end
 
-    for _, v in ipairs(chicagoRP.radioplaylists) do
+    for k, v in ipairs(chicagoRP.radioplaylists) do
         if NextSongTime[v.name] <= SysTime() + 2 and !table.IsEmpty(music_left[v.name]) then
             -- table.remove(music_left[v.name], 1)
 
@@ -252,20 +239,23 @@ local function table_calculation()
 
             for _, v2 in ipairs (music_left[v.name]) do
                 local numbergen = math.random(0, 100)
+                local count = nil
 
                 -- LastSongArtist[v.name] = v2.artist
                 -- LastSongName[v.name] = v2.song
 
-                if !isempty(v2.chance) and (numbergen >= v2.chance) and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                    for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
-                        table.insert(music_left[v.name], k, v)
-                        -- NoInterupt[v.name] = true
-                        -- DJTalking[v.name] = false
+                if !isempty(v2.chance) and numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                    for k1, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
+                        -- table.remove(music_left[v.name], k1)
+                        -- print(k1)
+                        table.insert(music_left[v.name], k1, v3)
+                        print("PLAYLIST TABLE INSERTED")
+                        NoInterupt[v.name] = true
                     end
-                elseif isempty(v2.chance) or (numbergen <= v2.chance) then -- how do stop this from comparing with nil???
-                    table.remove(music_left[v.name], 1)
-                    -- NoInterupt[v.name] = false
-                    -- DJTalking[v.name] = true
+                elseif (isempty(v2.chance) and isempty(v2.playlist) and !isempty(v2.song)) or (numbergen <= v2.chance) then
+                    table.remove(music_left[v.name], k)
+                    print("elseif chance song removed")
+                    NoInterupt[v.name] = false
                 end
 
                 -- local djtable = table.Shuffle(chicagoRP_DJ[v.name])
@@ -277,6 +267,14 @@ local function table_calculation()
                 --         break
                 --     end
                 -- end
+                if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                    count = #chicagoRP[v2.playlist]
+                end
+
+                if isnumber(v2.chance) and isstring(v2.playlist) then -- working, but doesn't remove the playlist
+                    print("removed that fucking cunt piece of shit playlist")
+                    table.remove(music_left[v.name], count + 1)
+                end
 
                 -- instead of doing entire seperate functions and operations for DJ: shuffle DJ table, loop through it, and do table.insert into music_left then break end
 
@@ -313,17 +311,29 @@ local function table_calculation()
 
             print("Table regenerated")
 
-            for _, v2 in ipairs (music_left[v.name]) do
+            for k, v2 in ipairs (music_left[v.name]) do
                 local numbergen = math.random(0, 100)
+                local count = nil
 
                 if !isempty(v2.chance) and numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
-                    for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
-                        table.insert(music_left[v.name], k, v)
-                        -- NoInterupt[v.name] = true
+                    for k1, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
+                        table.insert(music_left[v.name], k1, v3)
+                        print("PLAYLIST TABLE INSERTED")
+                        NoInterupt[v.name] = true
                     end
-                elseif isempty(v2.chance) or (numbergen <= v2.chance) then
-                    table.remove(music_left[v.name], 1)
-                    -- NoInterupt[v.name] = false
+                elseif (isempty(v2.chance) and isempty(v2.playlist) and !isempty(v2.song)) or (numbergen <= v2.chance) then
+                    table.remove(music_left[v.name], k)
+                    print("elseif chance song removed")
+                    NoInterupt[v.name] = false
+                end
+
+                if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
+                    count = #chicagoRP[v2.playlist]
+                end
+
+                if isnumber(v2.chance) and isstring(v2.playlist) then -- working, but doesn't remove the playlist
+                    print("removed that fucking cunt piece of shit playlist")
+                    table.remove(music_left[v.name], count + 1)
                 end
 
                 StartPosition[v.name] = SysTime()

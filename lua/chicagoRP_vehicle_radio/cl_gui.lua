@@ -25,14 +25,18 @@ local radioOffMat = Material("chicagorp_vehicleradio/radiooff.png", "smooth mips
 AddCSLuaFile("circles.lua")
 local circles = include("circles.lua")
 
-if istable(chicagoRP.radioplaylists) then -- fix this, make local function that returns end if materials already exist
-    for k, v in ipairs(chicagoRP.radioplaylists) do
-        radioIcon[k] = Material(v.icon, "smooth mips")
-    end
-end
-
 local function isempty(s)
     return s == nil or s == ''
+end
+
+local function CreateIcons()
+    if istable(chicagoRP.radioplaylists) then -- fix this, make local function that returns end if materials already exist
+        for k, v in ipairs(chicagoRP.radioplaylists) do
+            if isempty(radioIcon[k]) then
+                radioIcon[k] = Material(v.icon, "smooth mips")
+            end
+        end
+    end
 end
 
 local function BlurBackground(panel)
@@ -469,6 +473,7 @@ net.Receive("chicagoRP_vehicleradio", function()
         surface.PlaySound("buttons/button14.wav")
     end
 
+    CreateIcons()
     UpdateElementsSize()
 
     function motherFrame:OnClose()
