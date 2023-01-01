@@ -197,7 +197,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
                     station:SetVolume(musicvolume)
                     print(station:GetTime())
                 end
-            elseif realtimestamp => 0.35
+            elseif realtimestamp >= 0.35 then
                 timer.Simple(0.35, function()
                     if IsValid(station) then
                         station:SetTime(realtimestamp, false) -- fucking desync wtf???
@@ -584,7 +584,7 @@ net.Receive("chicagoRP_vehicleradio", function()
                     hoverindex = k
                 end
 
-                if (hovered or (hoveredpanel == motherframe and currenthover == stationtostations) then
+                if (hovered or (hoveredpanel == motherframe and currenthover == stationtostations)) then
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
                     iconalpha = Lerp(math.min(FrameTime() * 5, 1), iconalpha, iconalpha * 2.55)
 
@@ -603,7 +603,7 @@ net.Receive("chicagoRP_vehicleradio", function()
                 -- print("CursorX: " .. cursorx)
                 -- print("CursorY: " .. cursory)
 
-                if (hovered or (hoveredpanel == motherframe and currenthover == stationtostations) and buf < 1 then
+                if (hovered or (hoveredpanel == motherframe and currenthover == stationtostations)) and buf < 1 then
                     buf = math.min(1, step + buf) 
                     -- IS hovered
                     -- NOT hovered, currentstation IS equal to self's playlist.name, hoveredpanel IS motherframe
@@ -622,7 +622,7 @@ net.Receive("chicagoRP_vehicleradio", function()
 
                 drawStationCircle(w / 2, h / 2, v.radius * 1.2, iconalpha, graynormal, k)
 
-                if (hovered or (hoveredpanel == motherframe and currenthover == stationtostations) and buf < 1 then
+                if (hovered or (hoveredpanel == motherframe and currenthover == stationtostations)) and buf < 1 then
                     Outlinebuf = math.min(1, Outlinestep + Outlinebuf)
                 elseif !hovered and currenthover != stationtostations and buf > 0 then
                     Outlinebuf = math.max(0, Outlinebuf - Outlinestep)
