@@ -250,12 +250,12 @@ local function table_calculation()
                         -- print(k1)
                         table.insert(music_left[v.name], k1, v3)
                         print("PLAYLIST TABLE INSERTED")
-                        NoInterupt[v.name] = true
+                        -- NoInterupt[v.name] = true
                     end
                 elseif (isempty(v2.chance) and isempty(v2.playlist) and !isempty(v2.song)) or (numbergen <= v2.chance) then
                     table.remove(music_left[v.name], k)
                     print("elseif chance song removed")
-                    NoInterupt[v.name] = false
+                    -- NoInterupt[v.name] = false
                 end
 
                 -- local djtable = table.Shuffle(chicagoRP_DJ[v.name])
@@ -319,12 +319,12 @@ local function table_calculation()
                     for k1, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
                         table.insert(music_left[v.name], k1, v3)
                         print("PLAYLIST TABLE INSERTED")
-                        NoInterupt[v.name] = true
+                        -- NoInterupt[v.name] = true
                     end
                 elseif (isempty(v2.chance) and isempty(v2.playlist) and !isempty(v2.song)) or (numbergen <= v2.chance) then
                     table.remove(music_left[v.name], k)
                     print("elseif chance song removed")
-                    NoInterupt[v.name] = false
+                    -- NoInterupt[v.name] = false
                 end
 
                 if !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
@@ -424,6 +424,24 @@ net.Receive("chicagoRP_vehicleradio_sendinfo", function(_, ply)
         -- print("fetchinfo Net sent!")
 
         break
+    end
+end)
+
+hook.Add("PlayerButtonUp", "chicagoRP_vehicleradio_ButtonReleaseCheck", function(ply, button) -- SWAG MESSIAH............
+    if button == KEY_SLASH and IsFirstTimePredicted() then
+        -- print("button up")
+        net.Start("chicagoRP_vehicleradio")
+        net.WriteBool(false)
+        net.Send(ply)
+    end
+end)
+
+hook.Add("PlayerButtonDown", "chicagoRP_vehicleradio_ButtonPressCheck", function(ply, button) -- SWAG MESSIAH............
+    if button == KEY_SLASH and IsFirstTimePredicted() then
+        print("button down")
+        net.Start("chicagoRP_vehicleradio")
+        net.WriteBool(true)
+        net.Send(ply)
     end
 end)
 

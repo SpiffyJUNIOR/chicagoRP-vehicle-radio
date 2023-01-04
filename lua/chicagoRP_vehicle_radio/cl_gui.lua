@@ -331,24 +331,26 @@ hook.Add("HUDShouldDraw", "chicagoRP_vehicleradio_HideHUD", function()
     end
 end)
 
-hook.Add("PlayerButtonUp", "chicagoRP_vehicleradio_ButtonReleaseCheck", function(ply, button) -- SWAG MESSIAH............
-    if button == KEY_BACKSLASH and IsFirstTimePredicted() and IsValid(OpenMotherFrame) then
-        chicagoRP.PanelFadeIn(motherFrame, 0.15)
-        timer.Simple(0.15, function()
-            if IsValid(OpenMotherFrame) then
-                OpenMotherFrame:Close()
-            end
-        end)
-    end
-end)
+-- hook.Add("PlayerButtonUp", "chicagoRP_vehicleradio_ButtonReleaseCheck", function(ply, button) -- SWAG MESSIAH............
+--     if button == KEY_SLASH and IsFirstTimePredicted() and IsValid(OpenMotherFrame) then
+--         print("button up")
+--         chicagoRP.PanelFadeIn(motherFrame, 0.15)
+--         timer.Simple(0.15, function()
+--             if IsValid(OpenMotherFrame) then
+--                 OpenMotherFrame:Close()
+--             end
+--         end)
+--     end
+-- end)
 
-hook.Add("PlayerButtonDown", "chicagoRP_vehicleradio_ButtonPressCheck", function(ply, button) -- SWAG MESSIAH............
-    if button == KEY_BACKSLASH and IsFirstTimePredicted() then
-        net.Start("chicagoRP_vehicleradio")
-        net.WriteBool(true)
-        net.Send(ply)
-    end
-end)
+-- hook.Add("PlayerButtonDown", "chicagoRP_vehicleradio_ButtonPressCheck", function(ply, button) -- SWAG MESSIAH............
+--     if button == KEY_SLASH and IsFirstTimePredicted() then
+--         print("button down")
+--         net.Start("chicagoRP_vehicleradio")
+--         net.WriteBool(true)
+--         net.Send(ply)
+--     end
+-- end)
 
 net.Receive("chicagoRP_vehicleradio", function()
     local ply = LocalPlayer()
@@ -358,7 +360,7 @@ net.Receive("chicagoRP_vehicleradio", function()
     if !ply:InVehicle() then return end
     print(IsDriver(ply:GetVehicle(), ply))
     if (!IsDriver(ply:GetVehicle(), ply)) then return end
-    if !input.IsKeyDown(KEY_BACKSLASH) then return end
+    if !input.IsKeyDown(KEY_SLASH) then return end
     if !enabled then return end
 
     local closebool = net.ReadBool()
