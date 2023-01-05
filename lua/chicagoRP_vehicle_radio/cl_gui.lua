@@ -191,7 +191,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
 
     -- local g_station = nil
     sound.PlayURL(url, "noblock", function(station) -- add fade in/out
-        if (IsValid(station)) then
+        if IsValid(station) and !IsValid(SONG) then
             station:Play()
             station:SetVolume(0)
             SONG = station
