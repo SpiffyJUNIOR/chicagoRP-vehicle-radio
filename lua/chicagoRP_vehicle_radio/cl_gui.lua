@@ -10,7 +10,7 @@ local ELEMENTS = {}
 local IconSize = 40
 local minIconReduction = 20
 local Dynamic = 0
-local enabled = GetConVar("cl_chicagoRP_vehicleradio_enable"):GetBool()
+local enabled = GetConVar("cl_chicagoRP_vehicleradio_enable")
 local reddebug = Color(200, 10, 10, 150)
 local graynormal = Color(20, 20, 20, 150)
 local whitecolor = Color(255, 255, 255, 255)
@@ -162,7 +162,7 @@ net.Receive("chicagoRP_vehicleradio_playsong", function()
     if !IsValid(ply) then return end
     -- if !IsValid(ply:GetVehicle()) then return end -- broken for some stupid reason
     -- if !ply:InVehicle() then return end -- broken for some stupid reason
-    if !enabled then return end
+    if !enabled:GetBool() then return end
 
     local stopsong = net.ReadBool()
 
@@ -220,7 +220,7 @@ end)
 local function StopSong()
     local ply = LocalPlayer()
     if !IsValid(ply) then return end
-    if !enabled then return end
+    if !enabled:GetBool() then return end
 
     net.Start("chicagoRP_vehicleradio_receiveindex")
     net.WriteBool(false)
@@ -262,7 +262,7 @@ local function SendStation(name)
     if !IsValid(ply) then return end
     if !IsValid(ply:GetVehicle()) then return end
     if !ply:InVehicle() then return end
-    if !enabled then return end
+    if !enabled:GetBool() then return end
 
     net.Start("chicagoRP_vehicleradio_receiveindex")
     net.WriteBool(true)
@@ -361,7 +361,7 @@ net.Receive("chicagoRP_vehicleradio", function()
     print(IsDriver(ply:GetVehicle(), ply))
     if (!IsDriver(ply:GetVehicle(), ply)) then return end
     if !input.IsKeyDown(KEY_SLASH) then return end
-    if !enabled then return end
+    if !enabled:GetBool() then return end
 
     local closebool = net.ReadBool()
 

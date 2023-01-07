@@ -119,7 +119,7 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
 
             if !isempty(v2.chance) and numbergen >= v2.chance and !isempty(v2.playlist) and istable(chicagoRP[v2.playlist]) then
                 print(v2.playlist)
-                print("SPY SPYSPYSP YSPYYSPPYSPYSPYSDAHGJFAUGGTEYWRDVHQABWERFNGAEYJHFBKSJGAEBSFDN ")
+                print("SPY SPYSPYSP YSPYYSPPYSPYSPYSDAHGJFAUGGTEYWRDVHQABWERFNGAEYJHFBKSJGAEBSFDN")
                 for k, v3 in ipairs (chicagoRP[v2.playlist]) do -- fuck we actually need k indexed for this :skull:
                     -- table.remove(music_left[v.name], k1)
                     -- print(k1)
@@ -149,6 +149,9 @@ for _, v in ipairs(chicagoRP.radioplaylists) do
                 PrintTable(music_left[v.name])
                 print(k1)
             end
+
+            -- [chicagorp-vehicle-radio] addons/chicagorp-vehicle-radio/lua/chicagorp_vehicle_radio/sv_util.lua:160: attempt to perform arithmetic on field 'length' (a nil value)
+            --     1. unknown - addons/chicagorp-vehicle-radio/lua/chicagorp_vehicle_radio/sv_util.lua:160
 
             PrintTable(v2)
             StartPosition[v.name] = SysTime()
@@ -277,6 +280,14 @@ local function table_calculation()
                 end
 
                 -- instead of doing entire seperate functions and operations for DJ: shuffle DJ table, loop through it, and do table.insert into music_left then break end
+
+                -- PLAYLIST TABLE INSERTED
+                -- removed that fucking cunt piece of shit playlist
+
+                -- [chicagorp-vehicle-radio] addons/chicagorp-vehicle-radio/lua/chicagorp_vehicle_radio/sv_util.lua:282: attempt to perform arithmetic on field 'length' (a nil value)
+                --   1. table_calculation - addons/chicagorp-vehicle-radio/lua/chicagorp_vehicle_radio/sv_util.lua:282
+                --    2. fn - addons/chicagorp-vehicle-radio/lua/chicagorp_vehicle_radio/sv_util.lua:496
+                --     3. unknown - lua/ulib/shared/hook.lua:109
 
                 StartPosition[v.name] = SysTime()
                 NextSongTime[v.name] = StartPosition[v.name] + v2.length
