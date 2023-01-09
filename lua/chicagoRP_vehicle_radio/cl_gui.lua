@@ -30,7 +30,7 @@ local function isempty(s)
 end
 
 local function CreateIcons()
-    if istable(chicagoRP.radioplaylists) then -- fix this, make local function that returns end if materials already exist
+    if istable(chicagoRP.radioplaylists) and isempty(radioIcon) then
         for k, v in ipairs(chicagoRP.radioplaylists) do
             if isempty(radioIcon[k]) then
                 radioIcon[k] = Material(v.icon, "smooth mips")
@@ -331,27 +331,6 @@ hook.Add("HUDShouldDraw", "chicagoRP_vehicleradio_HideHUD", function()
     end
 end)
 
--- hook.Add("PlayerButtonUp", "chicagoRP_vehicleradio_ButtonReleaseCheck", function(ply, button) -- SWAG MESSIAH............
---     if button == KEY_SLASH and IsFirstTimePredicted() and IsValid(OpenMotherFrame) then
---         print("button up")
---         chicagoRP.PanelFadeIn(motherFrame, 0.15)
---         timer.Simple(0.15, function()
---             if IsValid(OpenMotherFrame) then
---                 OpenMotherFrame:Close()
---             end
---         end)
---     end
--- end)
-
--- hook.Add("PlayerButtonDown", "chicagoRP_vehicleradio_ButtonPressCheck", function(ply, button) -- SWAG MESSIAH............
---     if button == KEY_SLASH and IsFirstTimePredicted() then
---         print("button down")
---         net.Start("chicagoRP_vehicleradio")
---         net.WriteBool(true)
---         net.Send(ply)
---     end
--- end)
-
 net.Receive("chicagoRP_vehicleradio", function()
     local ply = LocalPlayer()
     if IsValid(OpenMotherFrame) then OpenMotherFrame:Close() return end
@@ -495,10 +474,6 @@ net.Receive("chicagoRP_vehicleradio", function()
             SendStation(chicagoRP.radioplaylists[hoverindex].name)
             currentStation = chicagoRP.radioplaylists[hoverindex].name
             currentStationPrintName = chicagoRP.radioplaylists[hoverindex].printname
-        end
-
-        if SONG then
-            SONG:Stop()
         end
 
         HideHUD = false
@@ -825,6 +800,7 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 -- add random chance of album being inserted (test)
 -- make timer.Simple only run if timestamp is < 0.35 (test)
 -- add radio wheel hover like GTA 5 (idk how to hover something based off radius, maybe try limiting where mouse can go?)
+-- make printname absolete with local string convert function
 -- make layout pos and size match GTA 5's
 -- add DJ/commerical support (delayed until everything else is finished)
 

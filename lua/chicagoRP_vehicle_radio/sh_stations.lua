@@ -1,4 +1,4 @@
--- chicagoRP_DJ = chicagoRP_DJ or {} -- maybe add stormfox 2 and atmos support for specific time of day voicelines
+-- chicagoRP_DJ = chicagoRP_DJ or {}
 
 chicagoRP.radioplaylists = {
     {
