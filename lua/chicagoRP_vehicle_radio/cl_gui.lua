@@ -30,7 +30,7 @@ local function isempty(s)
 end
 
 local function CreateIcons()
-    if istable(chicagoRP.radioplaylists) and isempty(radioIcon) then
+    if istable(chicagoRP.radioplaylists) and table.IsEmpty(radioIcon) then
         for k, v in ipairs(chicagoRP.radioplaylists) do
             if isempty(radioIcon[k]) then
                 radioIcon[k] = Material(v.icon, "smooth mips")
@@ -558,9 +558,9 @@ net.Receive("chicagoRP_vehicleradio", function()
 
                 self.value = chicagoRP.radioplaylists[k].name
 
-                print(vgui.GetHoveredPanel())
-                print(currentStation)
-                print(currenthover)
+                -- print(vgui.GetHoveredPanel())
+                -- print(currentStation)
+                -- print(currenthover)
 
                 if hovered then
                     hoverindex = k
@@ -570,8 +570,8 @@ net.Receive("chicagoRP_vehicleradio", function()
                     v.radius = Lerp(math.min(RealFrameTime() * 5, 1), v.radius, IconSize * 1.1)
                     iconalpha = Lerp(math.min(FrameTime() * 5, 1), iconalpha, iconalpha * 2.55)
 
-                    print(self.value)
-                    print(currentStation)
+                    -- print(self.value)
+                    -- print(currentStation)
 
                     stationname = chicagoRP.radioplaylists[k].printname
                     artistname = artistcachedname
@@ -790,15 +790,12 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
--- previous stations song continuing to play when switching (test fix)
--- song and artist name don't immediately switch to currentstation's one on UI open if you hover on other station then exit UI (test fix)
+-- previous stations song continuing to play when switching (fix did not work, how do we fix this???)
 
 -- to-do:
--- keep hover on station if currentstation == k and nothing else is hovered (test)
--- make icons transparent when not hovered (test)
--- make radio open button hold open (test)
--- add random chance of album being inserted (test)
--- make timer.Simple only run if timestamp is < 0.35 (test)
+-- keep hover on station if currentstation == k and nothing else is hovered (change to just last hovered because of how final GUI will work)
+-- make icons transparent when not hovered (not working)
+-- add random chance of album being inserted (item with chance is failing to be removed from music_left table, we should change approach to removing it in playsong func)
 -- add radio wheel hover like GTA 5 (idk how to hover something based off radius, maybe try limiting where mouse can go?)
 -- make printname absolete with local string convert function
 -- make layout pos and size match GTA 5's

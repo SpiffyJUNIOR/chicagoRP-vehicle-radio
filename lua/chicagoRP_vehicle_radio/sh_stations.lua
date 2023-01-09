@@ -59,6 +59,11 @@ chicagoRP.alternative_metal = {
         song = "Be Quiet and Drive (Far Away)",
         url = "https://files.catbox.moe/8xtxol.mp3"
     }, {
+        artist = "Battles",
+        length = 427, -- 357
+        song = "Atlas",
+        url = "https://files.catbox.moe/qresw9.mp3"
+    }, {
         artist = "System of a Down",
         length = 216, -- 519
         song = "Toxicity",
@@ -225,6 +230,11 @@ chicagoRP.synthpop = {
         song = "Enjoy the Silence",
         url = "https://files.catbox.moe/x1ncso.mp3"
     }, {
+        artist = "Depeche Mode",
+        length = 359, -- 519
+        song = "It's No Good.",
+        url = "https://files.catbox.moe/bxvgrf.mp3"
+    }, {
         artist = "MGMT",
         length = 261, -- 519
         song = "Time to Pretend",
@@ -235,22 +245,22 @@ chicagoRP.synthpop = {
 chicagoRP.vaporwave = {
     {
         artist = "Macintosh Plus",
-        length = 372, -- 262
+        length = 440, -- 262
         song = "420 hiragana title",
-        url = "https://files.catbox.moe/x1ncso.mp3"
+        url = "https://files.catbox.moe/x73457.mp3"
     }, {
         artist = "death's dynamic shroud",
-        length = 261, -- 519
+        length = 260, -- 519
         song = "I'll Try Living Like This",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/6ojehl.mp3"
     }, {
         artist = "Oneothrix Point Never",
         chance = 20,
-        length = 261, -- 519
+        length = 512, -- 519
         song = "END OF LIFE ENTERTAINMENT SCENARIO",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/81ol2h.mp3"
     }, {
-        chance = 50,
+        chance = 80,
         playlist = "eccojams_vol1"
     }
 }
@@ -602,54 +612,79 @@ chicagoRP.vaporwave = {
 chicagoRP.eccojams_vol1 = {
     {
         artist = "Chuck Person",
-        length = 372, -- 262
+        length = 163, -- 262
         song = "A1",
-        url = "https://files.catbox.moe/x1ncso.mp3"
+        url = "https://files.catbox.moe/ee7ua9.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 241, -- 519
         song = "A2",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/rwwrl9.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 392, -- 519
         song = "A3",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/xgbxqt.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 124, -- 519
         song = "A4",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/sxqdgx.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 184, -- 519
         song = "A5",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/41m4o8.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 179, -- 519
+        song = "A6",
+        url = "https://files.catbox.moe/znddq5.mp3"
+    }, {
+        artist = "Chuck Person",
+        length = 147, -- 519
+        song = "A7",
+        url = "https://files.catbox.moe/9r4fom.mp3"
+    }, {
+        artist = "Chuck Person",
+        length = 312, -- 519
+        song = "A8",
+        url = "https://files.catbox.moe/c8f7jz.mp3"
+    }, {
+        artist = "Chuck Person",
+        length = 294, -- 519
         song = "B1",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/1au2jb.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 296, -- 519
         song = "B2",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/wtr9pj.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 274, -- 519
         song = "B3",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/hgyfqv.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 138, -- 519
         song = "B4",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/c56qpq.mp3"
     }, {
         artist = "Chuck Person",
-        length = 261, -- 519
+        length = 183, -- 519
         song = "B5",
-        url = "https://files.catbox.moe/zr32zq.mp3"
+        url = "https://files.catbox.moe/02f6fl.mp3"
+    }, {
+        artist = "Chuck Person",
+        length = 153, -- 519
+        song = "B6",
+        url = "https://files.catbox.moe/fudvul.mp3"
+    }, {
+        artist = "Chuck Person",
+        length = 267, -- 519
+        song = "B7",
+        url = "https://files.catbox.moe/wzl9az.mp3"
     }
 }
 
