@@ -791,6 +791,8 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 -- bugs:
 -- SetTime randomly desyncs for absolutely no fucking reason whatsoever (https://github.com/SpiffyJUNIOR/chicagoRP-vehicle-radio/issues/1) MUST FIX, HIGH PRIORITY!!!
 -- previous stations song continuing to play when switching (fix did not work, how do we fix this???)
+-- song is always first song in the music_left table
+-- keyvalue that has chance value + playlist value is not being removed from music_left table
 
 -- to-do:
 -- keep hover on station if currentstation == k and nothing else is hovered (change to just last hovered because of how final GUI will work)
