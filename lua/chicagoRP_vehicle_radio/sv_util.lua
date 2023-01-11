@@ -509,7 +509,7 @@ end
 
 hook.Add("Tick", "chicagoRP_vehicleradio_tablelogicloop", MusicHandler)
 
-concommand.Add("chicagoRP_vehicleradio", function(ply) -- how we close/open this based on bind being held?
+concommand.Add("chicagoRP_vehicleradio", function(ply)
     if !IsValid(ply) then return end
     -- net.Start("chicagoRP_vehicleradio")
     -- net.WriteBool(true)

@@ -800,6 +800,7 @@ print("chicagoRP Vehicle Radio GUI loaded!")
 -- add random chance of album being inserted (item with chance is failing to be removed from music_left table, we should change approach to removing it in playsong func)
 -- add radio wheel hover like GTA 5 (idk how to hover something based off radius, maybe try limiting where mouse can go?)
 -- make printname absolete with local string convert function
+-- make song not change when switching svmod/simfphys seat
 -- make layout pos and size match GTA 5's
 -- add DJ/commerical support (delayed until everything else is finished)
 
